@@ -1,4 +1,4 @@
-const { onMounted } = Vue;
+// const { onMounted } = Vue;
 
 const TransactionView = {
   name: 'TransactionView',
