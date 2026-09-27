@@ -27,7 +27,6 @@ const SettingView = {
             <span class="text-xs font-bold text-slate-800">{{ form.printerPreset || 'Epson' }} <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[9px] ml-1">DEFAULT</span></span>
             <span class="text-[10px] text-slate-500 uppercase">{{ isHardwareConnected ? 'TERHUBUNG' : 'STANDBY' }} &bull; Raw Data</span>
           </div>
-          <!-- Tombol Cetak Hardware Nyata -->
           <button @click="testHardwarePrint" :disabled="testingPort" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
             <span v-if="testingPort" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
             <span v-else class="material-symbols-outlined text-[18px]">print</span> 
@@ -93,10 +92,27 @@ const SettingView = {
                 </div>
               </div>
 
+              <!-- DATA DINAMIS: PERANGKAT YANG DITEMUKAN -->
+              <transition enter-active-class="transition duration-300 ease-out" enter-from-class="-translate-y-4 opacity-0" enter-to-class="translate-y-0 opacity-100">
+                <div v-if="scannedDevice" class="p-4 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-inner">
+                  <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
+                      <span class="material-symbols-outlined">{{ scannedDevice.type === 'USB' ? 'cable' : 'bluetooth_connected' }}</span>
+                    </div>
+                    <div>
+                      <p class="text-xs font-bold text-emerald-800 uppercase tracking-wider mb-0.5">Perangkat Terdeteksi Aktif</p>
+                      <p class="text-sm font-semibold text-emerald-900">{{ scannedDevice.name }}</p>
+                      <p class="text-[10px] text-emerald-600 font-mono mt-0.5">ID: {{ scannedDevice.id }}</p>
+                    </div>
+                  </div>
+                  <span class="px-2.5 py-1 bg-emerald-600 text-white text-[10px] font-bold rounded-lg shadow-sm">KONEKSI SIAP</span>
+                </div>
+              </transition>
+
               <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div class="md:col-span-2">
-                  <label class="text-xs font-semibold text-slate-700 block mb-1.5">{{ form.interfaceType === 'LAN' ? 'IP Address Printer' : 'ID / Nama Perangkat (Otomatis)' }}</label>
-                  <input type="text" v-model="form.portOrIp" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brandprimary focus:bg-white font-mono" placeholder="Contoh: COM3 / 192.168.1.100">
+                  <label class="text-xs font-semibold text-slate-700 block mb-1.5">{{ form.interfaceType === 'LAN' ? 'IP Address Printer' : 'ID / Port Perangkat' }}</label>
+                  <input type="text" v-model="form.portOrIp" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brandprimary focus:bg-white font-mono" placeholder="Pindai port atau ketik manual...">
                 </div>
                 <div>
                   <label class="text-xs font-semibold text-slate-700 block mb-1.5">Baud Rate (Speed)</label>
@@ -110,42 +126,19 @@ const SettingView = {
               </div>
 
               <div>
-                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-3">Preset Profil Driver Perangkat (RAW Command)</label>
+                <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-3">Preset Profil Driver Perangkat (Bahasa Mesin)</label>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                  <label class="relative cursor-pointer">
-                    <input type="radio" v-model="form.printerPreset" value="Epson" class="peer sr-only" name="preset">
+                  <!-- DATA DINAMIS: Render list driver dari state Vue (bukan hardcode) -->
+                  <label v-for="preset in driverPresets" :key="preset.id" class="relative cursor-pointer">
+                    <input type="radio" v-model="form.printerPreset" :value="preset.id" class="peer sr-only" name="preset">
                     <div class="p-3 border border-slate-200 rounded-xl peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary transition-all bg-white relative">
                       <div class="absolute top-3 right-3 w-3 h-3 rounded-full border border-slate-300 peer-checked:border-brandprimary peer-checked:bg-brandprimary"></div>
-                      <h4 class="font-bold text-sm text-slate-800 mb-0.5">Epson</h4>
-                      <p class="text-[10px] text-slate-500 mb-1">TM-T82 / TM-T88</p>
-                      <span class="text-[9px] font-mono text-emerald-600 bg-emerald-50 px-1 rounded">ESC/POS Standard</span>
-                    </div>
-                  </label>
-                  <label class="relative cursor-pointer">
-                    <input type="radio" v-model="form.printerPreset" value="StarLine" class="peer sr-only" name="preset">
-                    <div class="p-3 border border-slate-200 rounded-xl peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary transition-all bg-white relative">
-                      <div class="absolute top-3 right-3 w-3 h-3 rounded-full border border-slate-300 peer-checked:border-brandprimary peer-checked:bg-brandprimary"></div>
-                      <h4 class="font-bold text-sm text-slate-800 mb-0.5">Star Line</h4>
-                      <p class="text-[10px] text-slate-500 mb-1">TSP100 / TSP650</p>
-                      <span class="text-[9px] font-mono text-slate-500 bg-slate-100 px-1 rounded">StarPRNT Emul</span>
-                    </div>
-                  </label>
-                  <label class="relative cursor-pointer">
-                    <input type="radio" v-model="form.printerPreset" value="Sunmi" class="peer sr-only" name="preset">
-                    <div class="p-3 border border-slate-200 rounded-xl peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary transition-all bg-white relative">
-                      <div class="absolute top-3 right-3 w-3 h-3 rounded-full border border-slate-300 peer-checked:border-brandprimary peer-checked:bg-brandprimary"></div>
-                      <h4 class="font-bold text-sm text-slate-800 mb-0.5">Sunmi</h4>
-                      <p class="text-[10px] text-slate-500 mb-1">Cloud / Desktop</p>
-                      <span class="text-[9px] font-mono text-slate-500 bg-slate-100 px-1 rounded">Sunmi Native ESC</span>
-                    </div>
-                  </label>
-                  <label class="relative cursor-pointer">
-                    <input type="radio" v-model="form.printerPreset" value="Generic" class="peer sr-only" name="preset">
-                    <div class="p-3 border border-slate-200 rounded-xl peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary transition-all bg-white relative">
-                      <div class="absolute top-3 right-3 w-3 h-3 rounded-full border border-slate-300 peer-checked:border-brandprimary peer-checked:bg-brandprimary"></div>
-                      <h4 class="font-bold text-sm text-slate-800 mb-0.5">Generic</h4>
-                      <p class="text-[10px] text-slate-500 mb-1">POS 58mm / 80mm</p>
-                      <span class="text-[9px] font-mono text-slate-500 bg-slate-100 px-1 rounded">Basic ESC Byte</span>
+                      <h4 class="font-bold text-sm text-slate-800 mb-0.5">{{ preset.name }}</h4>
+                      <p class="text-[10px] text-slate-500 mb-1">{{ preset.desc }}</p>
+                      <span class="text-[9px] font-mono px-1 rounded" 
+                            :class="form.printerPreset === preset.id ? 'text-emerald-600 bg-emerald-50' : 'text-slate-500 bg-slate-100'">
+                        {{ preset.badge }}
+                      </span>
                     </div>
                   </label>
                 </div>
@@ -154,11 +147,11 @@ const SettingView = {
               <!-- TOMBOL HARDWARE NYATA -->
               <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
                 <button type="button" @click="scanPorts" class="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
-                  <span class="material-symbols-outlined text-[18px]">search</span> Hubungkan Perangkat
+                  <span class="material-symbols-outlined text-[18px]">search</span> Pindai Port Perangkat
                 </button>
                 <button type="button" @click="testHardwarePulse" :disabled="testingPort" class="flex-1 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-70">
                   <span v-if="testingPort" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
-                  <span v-else class="material-symbols-outlined text-[18px]">bolt</span> Tes Kick Laci (Raw Pulse)
+                  <span v-else class="material-symbols-outlined text-[18px]">sync_alt</span> Tes Komunikasi & Laci
                 </button>
               </div>
             </div>
@@ -177,7 +170,6 @@ const SettingView = {
             </div>
             
             <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-8">
-              <!-- Kiri: Lebar & Feed -->
               <div class="space-y-6">
                 <div>
                   <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-3">Lebar Gulungan Kertas (Width)</label>
@@ -215,7 +207,6 @@ const SettingView = {
                 </div>
               </div>
 
-              <!-- Kanan: Density & Charset -->
               <div class="space-y-6">
                 <div>
                   <label class="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-3">Kepadatan Head Thermal (Density)</label>
@@ -342,7 +333,7 @@ const SettingView = {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="text-xs font-semibold text-slate-700 block mb-1.5">Teks Header Utama Toko</label>
-                  <textarea v-model="form.headerText" rows="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brandprimary font-mono text-[11px] resize-none" placeholder="Baris 1: Nama TokonBaris 2: Alamat..."></textarea>
+                  <textarea v-model="form.headerText" rows="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brandprimary font-mono text-[11px] resize-none" placeholder="Baris 1: Nama Toko\\nBaris 2: Alamat..."></textarea>
                 </div>
                 <div>
                   <label class="text-xs font-semibold text-slate-700 block mb-1.5">Pesan Footer & Promo</label>
@@ -438,14 +429,14 @@ const SettingView = {
         <!-- Kolom Kanan: Pratinjau & Panel Uji (1/3 width) -->
         <div class="w-full xl:w-[400px] shrink-0 space-y-6">
           
-          <!-- Card Pratinjau Struk (Data Real) -->
+          <!-- Card Pratinjau Struk (DUMMY TETAP SEPERTI PERMINTAAN) -->
           <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5 flex flex-col h-auto">
             <div class="flex items-center justify-between mb-4">
               <div>
                 <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                   <span class="material-symbols-outlined text-brandprimary text-[18px]">visibility</span> Pratinjau Struk
                 </h3>
-                <p class="text-[10px] text-slate-500 mt-0.5">Simulasi visual dari transaksi terakhir</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">Simulasi visual output printer</p>
               </div>
               <div class="bg-emerald-50 text-emerald-700 px-2 py-1 rounded text-[10px] font-bold font-mono">
                 {{ form.paperWidth }} MM ({{ form.paperWidth === '80' ? '48' : '32' }} CH)
@@ -458,7 +449,7 @@ const SettingView = {
                  <span class="material-symbols-outlined animate-spin text-brandprimary text-3xl">progress_activity</span>
               </div>
               
-              <div v-if="previewTrx" id="receipt-preview-content" class="relative bg-white shadow-md pb-12 pt-6 px-4 transition-all duration-300 origin-top"
+              <div id="receipt-preview-content" class="relative bg-white shadow-md pb-12 pt-6 px-4 transition-all duration-300 origin-top"
                    :style="{ width: form.paperWidth === '80' ? '100%' : '75%', transform: form.paperWidth === '80' ? 'scale(1)' : 'scale(0.95)' }">
                 <!-- Gerigi Atas -->
                 <div class="absolute -top-1 left-0 w-full h-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCw4IDQsMCA4LDggMCw4IiBmaWxsPSIjZmZmZmZmIi8+PC9zdmc+')] z-10 hide-on-print"></div>
@@ -476,32 +467,32 @@ const SettingView = {
                   </div>
 
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-2 text-[8px] sm:text-[9px]">
-                    <div class="flex justify-between" v-if="form.showRegister"><span>NO: {{ previewTrx.receipt_no }}</span><span>{{ formatDate(previewTrx.created_at) }}</span></div>
-                    <div class="flex justify-between" v-if="form.showRegister"><span>KASIR: {{ previewTrx.kasir_name }}</span><span>REG: #01</span></div>
+                    <div class="flex justify-between" v-if="form.showRegister"><span>NO: {{ dummyTrx.receipt_no }}</span><span>{{ formatDate(dummyTrx.created_at) }}</span></div>
+                    <div class="flex justify-between" v-if="form.showRegister"><span>KASIR: {{ dummyTrx.kasir_name }}</span><span>REG: #01</span></div>
                     <div class="text-center mt-1" v-if="form.showNpwp">NPWP: 01.852.482.9-021.000</div>
                   </div>
 
-                  <!-- Real Items -->
+                  <!-- Dummy Items -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-2 space-y-1.5">
-                    <div v-for="item in previewTrx.items" :key="item.name">
+                    <div v-for="item in dummyTrx.items" :key="item.name">
                       <div class="flex justify-between font-bold"><span>{{ item.name }}</span><span>{{ formatRupiah(item.subtotal) }}</span></div>
                       <div class="text-slate-500">{{ item.qty }} pcs x {{ formatRupiah(item.unit_price) }}</div>
                     </div>
                   </div>
 
-                  <!-- Real Totals -->
+                  <!-- Dummy Totals -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-4 space-y-0.5">
-                    <div class="flex justify-between"><span>SUBTOTAL ({{ previewTrx.items?.length || 0 }} ITEM)</span><span>{{ formatRupiah(previewTrx.total_amount) }}</span></div>
+                    <div class="flex justify-between"><span>SUBTOTAL ({{ dummyTrx.items.length }} ITEM)</span><span>{{ formatRupiah(dummyTrx.total_amount) }}</span></div>
                     <div class="flex justify-between font-bold text-[10px] sm:text-[11px] py-1 border-t border-b border-dashed border-slate-300 my-1">
-                      <span>TOTAL AKHIR</span><span>{{ formatRupiah(previewTrx.total_amount) }}</span>
+                      <span>TOTAL AKHIR</span><span>{{ formatRupiah(dummyTrx.total_amount) }}</span>
                     </div>
-                    <div class="flex justify-between"><span>TUNAI (CASH)</span><span>{{ formatRupiah(previewTrx.payment_amount) }}</span></div>
-                    <div class="flex justify-between font-bold"><span>KEMBALIAN</span><span>{{ formatRupiah(previewTrx.change_amount) }}</span></div>
+                    <div class="flex justify-between"><span>TUNAI (CASH)</span><span>{{ formatRupiah(dummyTrx.payment_amount) }}</span></div>
+                    <div class="flex justify-between font-bold"><span>KEMBALIAN</span><span>{{ formatRupiah(dummyTrx.change_amount) }}</span></div>
                   </div>
 
                   <div v-if="form.showBarcode" class="flex flex-col items-center mb-3">
                     <div class="w-3/4 h-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIj48cGF0aCBkPSJNMTAgMTBoMTB2ODBIMTB6TTMwIDEwaDIwdjgwSDMweiM2MCAxMGg1djgwSDYweiM3NSAxMGgxMHY4MEg3NXpNOTUgMTBoMTV2ODBIMTV6IiBmaWxsPSIjMzMzIi8+PC9zdmc+')] bg-cover opacity-80"></div>
-                    <span class="text-[7px] mt-0.5 tracking-widest">*{{ previewTrx.receipt_no }}*</span>
+                    <span class="text-[7px] mt-0.5 tracking-widest">*{{ dummyTrx.receipt_no }}*</span>
                   </div>
                   
                   <div v-if="form.showQris" class="flex flex-col items-center mb-3 hide-on-print">
@@ -550,9 +541,15 @@ const SettingView = {
     // Variabel Penahan Koneksi API Hardware Web
     let serialPort = null; 
     let bluetoothDevice = null;
+    let scannedDevice = ref(null); // Menahan info visual perangkat yang terdeteksi
 
-    // Data Transaksi Asli untuk Pratinjau (Menarik dari Backend)
-    const previewTrx = ref(null);
+    // Data Pilihan Preset Driver
+    const driverPresets = ref([
+      { id: 'Epson', name: 'Epson', desc: 'TM-T82 / TM-T88', badge: 'ESC/POS Full Cmd' },
+      { id: 'StarLine', name: 'Star Line', desc: 'TSP100 / TSP650', badge: 'StarPRNT Emul' },
+      { id: 'Sunmi', name: 'Sunmi', desc: 'Cloud / Desktop', badge: 'Sunmi Native ESC' },
+      { id: 'Generic', name: 'Generic', desc: 'POS 58mm / 80mm', badge: 'Basic ESC Byte' }
+    ]);
 
     // Default Form Config
     const form = ref({
@@ -578,7 +575,19 @@ const SettingView = {
       playBeeper: true
     });
 
-    // Format Helpers
+    const dummyTrx = ref({
+       receipt_no: 'TRX-20250524-014X',
+       created_at: new Date().toISOString(),
+       kasir_name: authState.user?.full_name || 'Budi Santoso',
+       items: [
+         { name: 'Kopi Arabika 250g', qty: 1, unit_price: 75000, subtotal: 75000 },
+         { name: 'Minyak Goreng Sawit 2L', qty: 1, unit_price: 38500, subtotal: 38500 }
+       ],
+       total_amount: 113500,
+       payment_amount: 150000,
+       change_amount: 36500
+    });
+
     const formatRupiah = (number) => {
       if (isNaN(number) || number === null) return 'Rp 0';
       return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
@@ -598,31 +607,6 @@ const SettingView = {
       if (val === 'true' || val === true) return true;
       if (val === 'false' || val === false) return false;
       return defaultVal;
-    };
-
-    // Fungsi fetch data transaksi terakhir betulan
-    const loadLatestTransaction = async () => {
-      const res = await apiRequest('transactions.list', {}, authState.token);
-      if (res.success && res.data && res.data.length > 0) {
-          const detailRes = await apiRequest('transactions.get', { id: res.data[0].id }, authState.token);
-          if (detailRes.success) {
-              previewTrx.value = detailRes.data;
-              return; // Sukses tarik transaksi asli
-          }
-      }
-      
-      // Fallback jika belum ada transaksi sama sekali di Database
-      previewTrx.value = {
-         receipt_no: 'TRX-BELUM-ADA-DATA',
-         created_at: new Date().toISOString(),
-         kasir_name: authState.user?.full_name || 'Kasir',
-         items: [
-           { name: 'Kopi Arabika (Contoh)', qty: 1, unit_price: 15000, subtotal: 15000 }
-         ],
-         total_amount: 15000,
-         payment_amount: 20000,
-         change_amount: 5000
-      };
     };
 
     const loadSettings = async () => {
@@ -669,10 +653,8 @@ const SettingView = {
 
     // ==================================================================
     // KODE HARDWARE NYATA (WEB SERIAL & WEB BLUETOOTH API)
-    // Berfungsi meng-encode huruf menjadi raw byte HEX khusus printer
     // ==================================================================
 
-    // Kamus Kode Printer Thermal Mentah (Raw Bytes)
     const getPrinterCommands = (preset) => {
       const cmds = {
         Epson:    { init: [0x1B, 0x40], cut: [0x1D, 0x56, 0x41, 0x00], kick: [0x1B, 0x70, 0x00, 0x19, 0xFA] },
@@ -683,7 +665,6 @@ const SettingView = {
       return cmds[preset] || cmds['Epson'];
     };
 
-    // Fungsi Pembuka Jendela Deteksi Colokan/Bluetooth OS
     const scanPorts = async () => {
       if (form.value.interfaceType === 'USB') {
         if (!('serial' in navigator)) {
@@ -693,7 +674,15 @@ const SettingView = {
         try {
           serialPort = await navigator.serial.requestPort();
           const info = serialPort.getInfo();
-          form.value.portOrIp = `USB_VID_${info.usbVendorId || 'Generic'}`;
+          const vendorId = info.usbVendorId ? info.usbVendorId.toString(16).toUpperCase() : 'UNKNOWN';
+          const productId = info.usbProductId ? info.usbProductId.toString(16).toUpperCase() : 'UNKNOWN';
+          
+          form.value.portOrIp = `USB_VID_${vendorId}&PID_${productId}`;
+          scannedDevice.value = {
+              type: 'USB',
+              name: `USB Printer Device (VID:${vendorId})`,
+              id: form.value.portOrIp
+          };
           isHardwareConnected.value = true;
           showToast('Kabel USB / COM berhasil dihubungkan ke Browser!');
         } catch (err) {
@@ -706,22 +695,23 @@ const SettingView = {
           return;
         }
         try {
-          bluetoothDevice = await navigator.bluetooth.requestDevice({
-             acceptAllDevices: true,
-             optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-          });
-          form.value.portOrIp = bluetoothDevice.name || `BLE_${bluetoothDevice.id.substring(0,8)}`;
+          bluetoothDevice = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+          form.value.portOrIp = bluetoothDevice.id || bluetoothDevice.name;
+          scannedDevice.value = {
+              type: 'BT',
+              name: bluetoothDevice.name || 'Unknown BT Device',
+              id: form.value.portOrIp
+          };
           isHardwareConnected.value = true;
-          showToast(`Berhasil dipasangkan dengan Bluetooth: ${form.value.portOrIp}`);
+          showToast(`Berhasil dipasangkan dengan Bluetooth: ${scannedDevice.value.name}`);
         } catch (err) {
-          showToast('Pemindaian Bluetooth dibatalkan: Pastikan printer tipe BLE.', 'error');
+          showToast('Pemindaian Bluetooth dibatalkan.', 'error');
         }
       } else {
         showToast('Untuk LAN/IP (Jaringan), silakan ketik IP Address secara manual.');
       }
     };
 
-    // Fungsi Pengiriman Raw Byte (Hardware Test)
     const sendRawData = async (dataArray) => {
        const uint8Data = new Uint8Array(dataArray);
 
@@ -737,7 +727,6 @@ const SettingView = {
           
        } else if (form.value.interfaceType === 'BT') {
           if (!bluetoothDevice) throw new Error("Perangkat Bluetooth belum dipilih.");
-          
           const server = await bluetoothDevice.gatt.connect();
           const services = await server.getPrimaryServices();
           if (services.length === 0) throw new Error("Tidak menemukan layanan BLE yang valid.");
@@ -760,7 +749,6 @@ const SettingView = {
        }
     };
 
-    // Aksi Tombol: "Tes Kick Laci"
     const testHardwarePulse = async () => {
       testingPort.value = true;
       try {
@@ -776,60 +764,27 @@ const SettingView = {
       }
     };
 
-    // Aksi Tombol: "Uji Cetak Asli" (Mencetak teks betulan ke thermal hardware)
     const testHardwarePrint = async () => {
       testingPort.value = true;
       try {
         const cmds = getPrinterCommands(form.value.printerPreset);
         
-        // Membangun format struk asli dari transaksi terakhir
-        const trx = previewTrx.value;
-        let textToPrint = "\n";
-        
-        // Header
-        if (form.value.headerText) {
-          // Parsing \n menjadi line break aktual
-          textToPrint += form.value.headerText.replace(/\\n/g, '\n') + "\n";
-        }
-        textToPrint += "================================\n";
-        if (form.value.showRegister) {
-          textToPrint += "NO   : " + trx.receipt_no + "\n";
-          textToPrint += "KASIR: " + trx.kasir_name + "\n";
-          textToPrint += "WAKTU: " + formatTime(trx.created_at) + "\n";
-        }
-        textToPrint += "--------------------------------\n";
-        
-        // Items Transaksi Asli
-        if (trx.items) {
-          trx.items.forEach(item => {
-             textToPrint += item.name + "\n";
-             textToPrint += item.qty + "x " + item.unit_price + " = " + item.subtotal + "\n";
-          });
-        }
-        
-        // Totals Transaksi Asli
-        textToPrint += "--------------------------------\n";
-        textToPrint += "TOTAL    : " + trx.total_amount + "\n";
-        textToPrint += "TUNAI    : " + trx.payment_amount + "\n";
-        textToPrint += "KEMBALIAN: " + trx.change_amount + "\n";
-        textToPrint += "================================\n";
-        
-        // Footer
-        if (form.value.footerText) {
-          textToPrint += form.value.footerText.replace(/\\n/g, '\n') + "\n";
-        }
-        textToPrint += "\n\n\n"; // Feed ekstra
+        const textToPrint = 
+          "\\n" +
+          "====== DECOUPLED POS ======\\n" +
+          "   TES KONEKSI HARDWARE\\n" +
+          "===========================\\n" +
+          "Preset : " + form.value.printerPreset + "\\n" +
+          "Koneksi: " + form.value.interfaceType + "\\n" +
+          "Port   : " + (form.value.portOrIp || "Unknown") + "\\n" +
+          "\\n\\nSukses! Perangkat terhubung.\\n\\n\\n";
         
         const textBytes = Array.from(textToPrint).map(c => c.charCodeAt(0));
         
-        // Gabung instruksi raw (init, text, laci, potong kertas)
-        const payload = [...cmds.init, ...textBytes];
-        if (form.value.autoKickDrawer) payload.push(...cmds.kick);
-        payload.push(...cmds.cut);
-
+        const payload = [...cmds.init, ...textBytes, ...cmds.cut];
         await sendRawData(payload);
         
-        showToast('Berhasil Mencetak Struk Aktual!');
+        showToast('Berhasil Mencetak lewat RAW Command!');
       } catch (err) {
         showToast(`Gagal Mencetak: ${err.message}`, 'error');
         isHardwareConnected.value = false;
@@ -840,12 +795,11 @@ const SettingView = {
 
     onMounted(() => {
       loadSettings();
-      loadLatestTransaction();
     });
 
     return {
-      form, loading, toast, previewTrx, authState, 
-      testingPort, isHardwareConnected,
+      form, loading, toast, dummyTrx, authState, 
+      testingPort, isHardwareConnected, scannedDevice, driverPresets,
       saveSettings, scanPorts, testHardwarePulse, testHardwarePrint,
       formatRupiah, formatDate, formatTime
     };
