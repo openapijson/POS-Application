@@ -1,3 +1,7 @@
+const { createApp, ref, watch } = Vue;
+
+// Hapus baris paling atas: const { createApp, ref, computed, onMounted, watch } = Vue;
+
 const app = Vue.createApp({
   setup() {
     const { ref, computed, onMounted, watch, nextTick } = Vue;
