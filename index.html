@@ -15,8 +15,9 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     
     <!-- [REVISI] Library HTML5-QRCode untuk scan barcode via WebRTC -->
-    <!-- [REVISI] Library HTML5-QRCode versi STABIL 2.3.8 -->
-    <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+     <!-- [LIBRARY BARU] QuaggaJS: Spesialis Barcode 1D (Retail) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/quagga/0.12.1/quagga.min.js"></script>
+    <!-- <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script> -->
 
     <!-- Tailwind CSS (Play CDN) -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -56,6 +57,21 @@
         .material-symbols-outlined {
             vertical-align: middle;
         }
+
+        /* Tambahan Wajib untuk QuaggaJS agar video pas di kotak */
+      #barcode-scanner video {
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover;
+      }
+      #barcode-scanner canvas.drawing, #barcode-scanner canvas.drawingBuffer {
+          position: absolute;
+          left: 0;
+          top: 0;
+          width: 100% !important;
+          height: 100% !important;
+          object-fit: cover;
+      }
     </style>
 
     <script>

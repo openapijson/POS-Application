@@ -92,8 +92,7 @@ const ProductView = {
               <tr v-for="prod in filteredProducts" :key="prod.id" class="hover:bg-slate-50 transition-colors group">
                 <td class="p-4">
                   <div class="w-10 h-10 rounded-lg border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center shrink-0">
-                    <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" :alt="prod.name" class="w-full h-full object-cover">
-                    <img v-else-if="prod.image_url" :src="prod.image_url" :alt="prod.name" class="w-full h-full object-cover">
+                    <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w150'" :alt="prod.name" class="w-full h-full object-cover">
                     <span v-else class="material-symbols-outlined text-slate-400 text-lg">image</span>
                   </div>
                 </td>
@@ -143,7 +142,7 @@ const ProductView = {
         </div>
       </div>
 
-      <!-- MODAL FORM PRODUK (Strict Structure) -->
+      <!-- MODAL FORM PRODUK -->
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="closeModal">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
           
@@ -254,7 +253,7 @@ const ProductView = {
                       <!-- Image Preview -->
                       <img v-if="formData.image_preview" :src="formData.image_preview" class="w-full h-full object-cover absolute inset-0 z-0">
                       
-                      <!-- Overlay Upload (Visible on hover or if empty) -->
+                      <!-- Overlay Upload -->
                       <div class="absolute inset-0 flex flex-col items-center justify-center p-4 text-center z-10 transition-opacity bg-white/80"
                            :class="formData.image_preview ? 'opacity-0 group-hover:opacity-100 backdrop-blur-sm' : 'opacity-100'">
                         <span class="material-symbols-outlined text-4xl text-slate-400 mb-2 group-hover:text-brandprimary transition-colors">cloud_upload</span>
@@ -292,23 +291,25 @@ const ProductView = {
         </div>
       </div>
 
-      <!-- MODAL SCANNER KHUSUS PRODUK (Z-INDEX SUPER TINGGI) -->
-      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
+      <!-- MODAL SCANNER KHUSUS PRODUK QUAGGAJS -->
+      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700">
            
            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
-               Scan Barcode
+               Scan Barcode Produk
              </h3>
              <button type="button" @click="stopScanner" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
                <span class="material-symbols-outlined text-[18px]">close</span>
              </button>
            </div>
            
-           <!-- Wadah Video Kamera -->
-           <div class="p-4 bg-slate-900 relative flex items-center justify-center min-h-[250px]">
-              <div id="product-qr-reader" class="w-full rounded-xl overflow-hidden shadow-inner bg-black"></div>
+           <div class="p-4 bg-gray-900 relative">
+              <!-- WADAH QUAGGA DENGAN KELAS CSS TAILWIND AGAR RESPONSIVE -->
+              <div id="product-qr-reader" class="w-full rounded-lg overflow-hidden border-2 border-gray-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
+                  <span v-if="cameraStarting" class="absolute material-symbols-outlined animate-spin text-white text-4xl z-0">progress_activity</span>
+              </div>
            </div>
            
            <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
@@ -362,14 +363,7 @@ const ProductView = {
     const modalMode = ref('add');
     const modalError = ref('');
     const formData = ref({
-      id: '',
-      barcode: '',
-      name: '',
-      category: '',
-      price: '',
-      stock: '',
-      image_base64: null, 
-      image_preview: null 
+      id: '', barcode: '', name: '', category: '', price: '', stock: '', image_base64: null, image_preview: null 
     });
 
     // Delete Modal State
@@ -378,7 +372,7 @@ const ProductView = {
 
     // Scanner Modal State
     const showScannerModal = ref(false);
-    let html5QrCode = null;
+    const cameraStarting = ref(false);
 
     // Helpers UI Computed
     const uniqueCategories = computed(() => {
@@ -570,68 +564,73 @@ const ProductView = {
       productToDelete.value = null;
     };
 
-    // LOGIKA SCANNER KAMERA KHUSUS PRODUK
+    // LOGIKA SCANNER KAMERA QUAGGAJS (KHUSUS PRODUK)
     const startScanner = () => {
       showScannerModal.value = true;
-      console.log("[PRODUK] Membuka modal scanner...");
+      cameraStarting.value = true;
+      console.log("[PRODUK] Membuka modal scanner QuaggaJS...");
 
       setTimeout(() => {
-        console.log("[PRODUK] Inisialisasi scanner pada elemen 'product-qr-reader'...");
-        try {
-          if (!document.getElementById("product-qr-reader")) {
-             console.error("[PRODUK] ERROR: Elemen div 'product-qr-reader' tidak ditemukan!");
-             return;
-          }
-
-          html5QrCode = new Html5Qrcode("product-qr-reader");
-          console.log("[PRODUK] Library Html5Qrcode berhasil dimuat.");
-
-          html5QrCode.start(
-            { facingMode: "environment" },
-            { 
-              fps: 10, 
-              qrbox: { width: 300, height: 150 },
-              experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true
-              }
-            },
-            (decodedText) => {
-              console.log("[PRODUK] YES! BARCODE KETEMU: ", decodedText);
-              try {
-                const ctx = new (window.AudioContext || window.webkitAudioContext)();
-                const osc = ctx.createOscillator();
-                osc.connect(ctx.destination);
-                osc.frequency.value = 800;
-                osc.start();
-                osc.stop(ctx.currentTime + 0.1);
-              } catch(e) {}
-              
-              formData.value.barcode = decodedText;
-              stopScanner();
-            },
-            (err) => { /* Abaikan pesan error frame-by-frame */ }
-          ).then(() => {
-             console.log("[PRODUK] Kamera SUKSES menyala.");
-          }).catch((err) => {
-             console.error("[PRODUK] Kamera GAGAL menyala:", err);
-             alert("Gagal menyalakan kamera: " + err);
-          });
-        } catch (err) {
-          console.error("[PRODUK] Terjadi error fatal saat setup kamera:", err);
-          alert("Error library kamera. Cek console log.");
-          stopScanner();
+        if (typeof Quagga === 'undefined') {
+          alert("Library QuaggaJS tidak ditemukan. Periksa koneksi internet.");
+          cameraStarting.value = false;
+          return;
         }
-      }, 500); // 500ms delay agar DOM modal benar-benar ter-render dulu
+
+        Quagga.init({
+          inputStream: {
+            name: "Live",
+            type: "LiveStream",
+            target: document.querySelector('#product-qr-reader'),
+            constraints: { facingMode: "environment" }
+          },
+          decoder: {
+            readers: [
+              "ean_reader", 
+              "ean_8_reader", 
+              "upc_reader", 
+              "code_128_reader", 
+              "code_39_reader"
+            ]
+          },
+          locate: true
+        }, function(err) {
+            cameraStarting.value = false;
+            if (err) {
+                console.error("[PRODUK] Kamera Gagal:", err);
+                alert("Gagal menyalakan kamera: " + err.message);
+                return;
+            }
+            Quagga.start();
+        });
+
+        // Event listener saat barcode ditemukan
+        Quagga.onDetected((data) => {
+          const code = data.codeResult.code;
+          console.log("[PRODUK] BARCODE KETEMU:", code);
+          
+          try {
+            const ctx = new (window.AudioContext || window.webkitAudioContext)();
+            const osc = ctx.createOscillator();
+            osc.connect(ctx.destination);
+            osc.frequency.value = 800;
+            osc.start();
+            osc.stop(ctx.currentTime + 0.1);
+          } catch(e) {}
+          
+          // Masukkan kode ke form dan tutup kamera
+          formData.value.barcode = code;
+          stopScanner();
+        });
+      }, 500);
     };
 
-    const stopScanner = async () => {
-      if (html5QrCode) {
-        try {
-          await html5QrCode.stop();
-        } catch(e) { console.warn("Error stopping scanner", e); }
-        html5QrCode.clear();
-        html5QrCode = null;
-      }
+    const stopScanner = () => {
+      try {
+        if (typeof Quagga !== 'undefined') {
+          Quagga.stop();
+        }
+      } catch(e) { console.warn("Error stopping scanner", e); }
       showScannerModal.value = false;
     };
 
@@ -640,42 +639,17 @@ const ProductView = {
     });
 
     onUnmounted(() => {
-      // Pastikan memori kamera dibersihkan kalau user tiba-tiba ganti halaman saat modal masih buka
       stopScanner();
     });
 
     return {
-      loading,
-      actionLoading,
-      globalError,
-      searchQuery,
-      filterCategory,
-      products,
-      uniqueCategories,
-      filteredProducts,
-      showModal,
-      modalMode,
-      modalError,
-      formData,
-      showDeleteModal,
-      productToDelete,
-      showScannerModal, // Export state
-      formatRupiah,
-      getStockStatusClass,
-      getStockStatusDotClass,
-      getStockStatusTextClass,
-      getStockStatusLabel,
-      loadProducts,
-      openAddModal,
-      openEditModal,
-      closeModal,
-      handleImageUpload,
-      clearImage,
-      submitForm,
-      confirmDelete,
-      executeDelete,
-      startScanner, // Export fungsi
-      stopScanner   // Export fungsi
+      loading, actionLoading, globalError, searchQuery, filterCategory,
+      products, uniqueCategories, filteredProducts, showModal, modalMode, modalError,
+      formData, showDeleteModal, productToDelete, 
+      showScannerModal, cameraStarting, formatRupiah, getStockStatusClass,
+      getStockStatusDotClass, getStockStatusTextClass, getStockStatusLabel,
+      loadProducts, openAddModal, openEditModal, closeModal, handleImageUpload,
+      clearImage, submitForm, confirmDelete, executeDelete, startScanner, stopScanner
     };
   }
 };
