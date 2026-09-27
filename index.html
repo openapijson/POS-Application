@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Decoupled POS</title>
+    
+    <!-- Google Fonts (Inter) & Material Symbols Outlined -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0" rel="stylesheet" />
+
+    <!-- Vue 3 Global Build -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    
+    <!-- Tailwind CSS (Play CDN) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root {
+            --color-bg: #f8fafc;
+            --color-surface: #ffffff;
+            --color-primary: #10b981;
+            --color-primary-hover: #059669;
+            --color-text: #1e293b;
+            --color-text-muted: #64748b;
+            --color-border: #e2e8f0;
+            --color-danger: #ef4444;
+            --color-warning: #f59e0b;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--color-bg);
+            color: var(--color-text);
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+        }
+
+        /* Utilitas untuk menyembunyikan scrollbar di area POS */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Material Symbols penyesuaian vertikal */
+        .material-symbols-outlined {
+            vertical-align: middle;
+        }
+    </style>
+
+    <script>
+        // Konfigurasi Tailwind untuk membaca CSS Variable
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandbg: 'var(--color-bg)',
+                        brandsurface: 'var(--color-surface)',
+                        brandprimary: 'var(--color-primary)',
+                        brandprimaryhover: 'var(--color-primary-hover)',
+                        brandtext: 'var(--color-text)',
+                        brandmuted: 'var(--color-text-muted)',
+                        brandborder: 'var(--color-border)',
+                        branddanger: 'var(--color-danger)',
+                        brandwarning: 'var(--color-warning)',
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-brandbg text-brandtext antialiased">
+    <!-- Vue akan mengontrol dan merender komponen di dalam div ini -->
+    <div id="app"></div>
+
+    <!-- 1. Konfigurasi dan API Wrapper -->
+    <script src="js/config.js"></script>
+    <script src="js/api.js"></script>
+    
+    <!-- 2. Auth State -->
+    <script src="js/auth.js"></script>
+    
+    <!-- 3. Daftar Views (Komponen Halaman) -->
+    <script src="js/views/LoginView.js"></script>
+    <script src="js/views/DashboardView.js"></script>
+    <script src="js/views/ProductView.js"></script>
+    <script src="js/views/PosView.js"></script>
+    <script src="js/views/TransactionView.js"></script>
+    
+    <!-- 4. Root App (Aplikasi Utama yang merakit semuanya) dideklarasikan paling akhir -->
+    <script src="js/app.js"></script>
+</body>
+</html>
