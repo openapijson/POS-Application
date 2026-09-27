@@ -1,4 +1,4 @@
-// const { ref, computed, onMounted } = Vue;
+const { computed, onMounted } = Vue;
 
 const ProductView = {
   name: 'ProductView',

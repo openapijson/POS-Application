@@ -1,4 +1,4 @@
-// const { ref, computed, onMounted } = Vue;
+const { computed, onMounted } = Vue;
 
 const TransactionView = {
   name: 'TransactionView',
