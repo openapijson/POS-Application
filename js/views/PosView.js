@@ -1,4 +1,4 @@
-const { onUnmounted } = Vue;
+const { onUnmounted, useAuth } = Vue;
 const PosView = {
   template: `
     <div class="h-full flex flex-col md:flex-row gap-6">
@@ -151,7 +151,7 @@ const PosView = {
   `,
   setup(props, { emit }) {
     const { ref, computed, onMounted, onUnmounted } = Vue;
-    const { token, logout } = useAuth();
+    const { token, logout } = authState;
     
     const products = ref([]);
     const cart = ref([]);
