@@ -1,7 +1,9 @@
 const { createApp, ref, watch, onMounted } = Vue;
 
-const app = createApp({
+const app = Vue.createApp({ // Gunakan Vue.createApp langsung
   setup() {
+    const { ref, computed, onMounted, watch } = Vue; // Pindahkan ke sini
+    
     // --- STATE ROUTING & UI ---
     const currentView = ref('login-view');
     const isCheckingSession = ref(true); // Loading awal saat cek token
@@ -214,8 +216,8 @@ const app = createApp({
 
           <!-- Konten View Dinamis -->
           <div class="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-brandbg">
+             <!-- Gunakan Keep-Alive khusus PosView agar keranjang tidak hilang jika kasir pindah tab ke riwayat sebentar -->
              <keep-alive include="PosView">
-                <!-- Gunakan Keep-Alive khusus PosView agar keranjang tidak hilang jika kasir pindah tab ke riwayat sebentar -->
                 <component :is="currentView" @change-view="changeView"></component>
              </keep-alive>
           </div>
