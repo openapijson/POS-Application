@@ -1,4 +1,4 @@
-const { createApp, ref, watch, onMounted } = Vue;
+const { createApp, ref, watch } = Vue;
 
 const app = Vue.createApp({ // Gunakan Vue.createApp langsung
   setup() {
