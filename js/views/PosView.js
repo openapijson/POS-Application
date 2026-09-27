@@ -151,7 +151,6 @@ const PosView = {
   `,
   setup(props, { emit }) {
     const { ref, computed, onMounted, onUnmounted } = Vue;
-    const { token, logout } = authState;
     
     const products = ref([]);
     const cart = ref([]);
@@ -181,7 +180,7 @@ const PosView = {
 
     const fetchProducts = async () => {
       loading.value = true;
-      const res = await apiRequest('products.list', {}, token.value);
+      const res = await apiRequest('products.list', {}, authState.token);
       loading.value = false;
       if (res.success) {
         products.value = res.data.filter(p => p.status === 'Active');
@@ -353,14 +352,14 @@ const PosView = {
         payment_method: 'CASH'
       };
 
-      const res = await apiRequest('pos.checkout', payload, token.value);
+      const res = await apiRequest('pos.checkout', payload, authState.token);
       loading.value = false;
 
       if (res.success) {
         alert('Transaksi Berhasil!\nKembalian: Rp 0\n(Fitur bayar pas)');
         cart.value = [];
         // Refresh stok produk dari server secara diam-diam
-        const refreshRes = await apiRequest('products.list', {}, token.value);
+        const refreshRes = await apiRequest('products.list', {}, authState.token);
         if (refreshRes.success) products.value = refreshRes.data.filter(p => p.status === 'Active');
       } else {
         if (res.message.includes('AUTH_ERROR')) logout();
