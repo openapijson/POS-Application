@@ -1,6 +1,4 @@
 const { onMounted } = Vue;
-// Hapus baris paling atas: const { ref, computed, onMounted, onUnmounted } = Vue;
-
 const ProductView = {
   name: 'ProductView',
   
@@ -575,7 +573,6 @@ const ProductView = {
     const startScanner = () => {
       showScannerModal.value = true;
       
-      // Tunggu DOM modal ter-render
       setTimeout(async () => {
         try {
           html5QrCode = new Html5Qrcode("product-qr-reader");
@@ -583,19 +580,12 @@ const ProductView = {
             { facingMode: "environment" },
             { 
               fps: 10, 
-              qrbox: { width: 250, height: 100 },
-              formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.QR_CODE
-              ]
+              qrbox: { width: 250, height: 120 },
+              experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true // SANGAT MEMBANTU BACA BARCODE 1D DI HP
+              }
             },
             (decodedText) => {
-              // Sukses scan: isi input, bunyikan BEEP, lalu tutup kamera otomatis
               try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
@@ -612,10 +602,10 @@ const ProductView = {
           );
         } catch (err) {
           console.error("Gagal menyalakan kamera", err);
-          alert("Gagal mengakses kamera. Pastikan izin browser diberikan.");
+          alert("Gagal mengakses kamera. Gunakan HP untuk fokus yang lebih baik.");
           stopScanner();
         }
-      }, 150); // Beri jeda 150ms
+      }, 150);
     };
 
     const stopScanner = async () => {

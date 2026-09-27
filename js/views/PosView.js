@@ -12,60 +12,33 @@ const PosView = {
         <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3 shrink-0">
            <div class="flex items-center justify-between mb-1">
              <div class="flex items-center gap-2">
-               <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-               <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Mode Pemindai Aktif</h2>
+               <span class="w-2.5 h-2.5 rounded-full bg-brandprimary"></span>
+               <h2 class="text-sm font-bold text-slate-800 uppercase tracking-wider">Input Produk</h2>
              </div>
-             <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-mono">F2: Cari</span>
+             <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-mono">F2: Cari Manual</span>
            </div>
 
-           <!-- [REVISI] Area Kamera Asli Terintegrasi html5-qrcode -->
-           <div class="w-full h-32 md:h-48 bg-slate-900 rounded-xl relative overflow-hidden flex flex-col items-center justify-center group border-2 transition-colors duration-300" :class="isCameraActive ? 'border-brandprimary' : 'border-slate-800'">
-              
-              <!-- Target div untuk video stream html5-qrcode -->
-              <div id="qr-reader" class="w-full h-full" v-show="isCameraActive"></div>
-              
-              <!-- Overlay saat kamera mati atau standby -->
-              <div v-if="!isCameraActive" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-900">
-                 <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">videocam_off</span>
-                 <button @click="startCamera" class="px-4 py-2 bg-brandprimary hover:bg-brandprimaryhover text-white text-xs font-bold rounded-lg shadow-lg shadow-brandprimary/20 transition-all flex items-center gap-2">
-                   <span class="material-symbols-outlined text-[16px]">qr_code_scanner</span>
-                   Nyalakan Kamera Scanner
-                 </button>
-              </div>
-
-              <!-- Overlay Kontrol saat kamera nyala -->
-              <button v-if="isCameraActive" @click="stopCamera" class="absolute top-2 right-2 px-2.5 py-1.5 bg-slate-900/80 hover:bg-red-600 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm transition-colors z-20 flex items-center gap-1 border border-slate-700">
-                <span class="material-symbols-outlined text-[14px]">videocam_off</span> Matikan
-              </button>
-
-              <!-- Reticle Scanner (Visual Guide) -->
-              <div v-if="isCameraActive" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
-                 <div class="relative w-48 h-16 md:w-64 md:h-24 border-2 border-emerald-500/50 rounded flex items-center justify-center">
-                   <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.5)] opacity-50 animate-pulse"></div>
-                   <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-emerald-500"></div>
-                   <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-emerald-500"></div>
-                   <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-emerald-500"></div>
-                   <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-emerald-500"></div>
-                 </div>
-                 <p class="text-[10px] text-emerald-400 font-mono mt-3 absolute bottom-3 z-10 bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">OPTIC CORE // ACTIVE</p>
-              </div>
-           </div>
+           <!-- Tombol Pop-up Kamera Kasir -->
+           <button @click="startCamera" class="w-full py-3 md:py-4 bg-slate-900 hover:bg-slate-800 text-white rounded-xl flex items-center justify-center gap-2 shadow-lg transition-all group">
+              <span class="material-symbols-outlined text-[24px] group-hover:scale-110 transition-transform">qr_code_scanner</span>
+              <span class="text-sm font-bold tracking-wide">Pindai Barcode (Kamera)</span>
+           </button>
 
            <!-- Input Barcode Manual -->
-           <div class="relative flex items-center mt-3">
+           <div class="relative flex items-center mt-2">
              <div class="absolute left-3 flex items-center justify-center text-slate-400">
-                <span class="material-symbols-outlined text-xl">barcode_scanner</span>
+                <span class="material-symbols-outlined text-xl">keyboard</span>
              </div>
              <input type="text" ref="barcodeInputRef" v-model="barcodeQuery" @keyup.enter="handleScan" :disabled="isScanning"
                class="w-full pl-10 pr-24 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-brandprimary/50 focus:bg-white transition-all font-mono"
-               placeholder="Scan barcode atau ketik SKU disini...">
+               placeholder="Ketik SKU / Barcode manual...">
              <button @click="handleScan" :disabled="!barcodeQuery || isScanning" class="absolute right-2 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-white text-xs font-bold rounded-lg transition-colors disabled:opacity-50">
                <span v-if="isScanning" class="material-symbols-outlined text-[14px] animate-spin">progress_activity</span>
                <span v-else>ENTER ↵</span>
              </button>
            </div>
            
-           <div v-if="scanError" class="text-xs text-red-500 flex items-center gap-1 mt-1">
+           <div v-if="scanError" class="text-xs text-red-500 flex items-center gap-1 mt-1 font-medium bg-red-50 p-2 rounded-lg">
              <span class="material-symbols-outlined text-[14px]">error</span> {{ scanError }}
            </div>
         </div>
@@ -232,10 +205,34 @@ const PosView = {
         </div>
       </div>
 
-      <!-- MODAL STRUK/SUKSES (Strict Structure) -->
+      <!-- MODAL SCANNER POS (POP-UP) -->
+      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopCamera">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col transform transition-all text-center border border-slate-700">
+           <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+             <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+               <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
+               Mode Pemindai Kasir Aktif
+             </h3>
+             <button type="button" @click="stopCamera" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
+               <span class="material-symbols-outlined text-[18px]">close</span>
+             </button>
+           </div>
+           
+           <div class="p-4 bg-slate-900 relative flex items-center justify-center min-h-[300px]">
+              <div id="qr-reader" class="w-full rounded-xl overflow-hidden shadow-inner bg-black"></div>
+           </div>
+           
+           <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
+             <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
+             Barang yang dipindai akan otomatis ditambahkan ke keranjang!
+             <span class="font-normal text-emerald-600 mt-1">Tekan di luar area putih ini untuk menutup kamera.</span>
+           </div>
+        </div>
+      </div>
+
+      <!-- MODAL STRUK/SUKSES -->
       <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="resetPos">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden flex flex-col transform transition-all text-center relative">
-          
           <!-- Ornamen sukses -->
           <div class="absolute -top-16 -left-16 w-32 h-32 bg-emerald-100 rounded-full blur-2xl"></div>
           <div class="absolute -top-16 -right-16 w-32 h-32 bg-blue-100 rounded-full blur-2xl"></div>
@@ -250,7 +247,6 @@ const PosView = {
             </p>
 
             <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100 space-y-3 text-left relative overflow-hidden">
-              <!-- Efek zig-zag struk (CSS murni) -->
               <div class="absolute top-0 left-0 w-full h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjQiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDQsNCA4LDAiIGZpbGw9IiNmOGZhZmMiLz48L3N2Zz4=')] opacity-50"></div>
               
               <div class="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
@@ -268,7 +264,6 @@ const PosView = {
               
               <div class="absolute bottom-0 left-0 w-full h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjQiPjxwb2x5Z29uIHBvaW50cz0iMCw0IDQsMCA4LDQiIGZpbGw9IiNmOGZhZmMiLz48L3N2Zz4=')] opacity-50"></div>
             </div>
-
             <p class="text-xs text-slate-400 mb-2">Harap serahkan struk dan uang kembalian ke pelanggan.</p>
           </div>
           
@@ -289,7 +284,6 @@ const PosView = {
   setup() {
     const { ref, computed, onMounted, onUnmounted } = Vue;
     
-    // State Katalog & Scanner
     const catalog = ref([]);
     const loadingCatalog = ref(true);
     const catalogQuery = ref('');
@@ -299,65 +293,47 @@ const PosView = {
     const isScanning = ref(false);
     const scanError = ref('');
 
-    // [REVISI] State Kamera Scanner Asli
-    const isCameraActive = ref(false);
+    // State Kamera Scanner Pop-up
+    const showScannerModal = ref(false);
     let html5QrCode = null;
-    let lastScanTime = 0; // Untuk debounce scan
+    let lastScanTime = 0; 
 
-    // State Cart & Pembayaran
+    // State Cart
     const cart = ref([]);
     const paymentAmount = ref('');
     const isCheckingOut = ref(false);
     const checkoutError = ref('');
-
-    // State Post-Transaction Modal
     const showSuccessModal = ref(false);
     const lastTransaction = ref({});
 
-    // --- COMPUTED PROPERTIES ---
     const filteredCatalog = computed(() => {
       if (!catalogQuery.value) return catalog.value;
       const q = catalogQuery.value.toLowerCase();
       return catalog.value.filter(p => p.name.toLowerCase().includes(q) || p.barcode.toLowerCase().includes(q));
     });
 
-    const cartTotalAmount = computed(() => {
-      return cart.value.reduce((sum, item) => sum + item.subtotal, 0);
-    });
+    const cartTotalAmount = computed(() => cart.value.reduce((sum, item) => sum + item.subtotal, 0));
+    const cartTotalItems = computed(() => cart.value.reduce((sum, item) => sum + item.qty, 0));
+    const changeAmount = computed(() => (parseFloat(paymentAmount.value) || 0) - cartTotalAmount.value);
 
-    const cartTotalItems = computed(() => {
-      return cart.value.reduce((sum, item) => sum + item.qty, 0);
-    });
-
-    const changeAmount = computed(() => {
-      const pay = parseFloat(paymentAmount.value) || 0;
-      return pay - cartTotalAmount.value;
-    });
-
-    // --- METHODS ---
     const loadCatalog = async () => {
       loadingCatalog.value = true;
       const res = await apiRequest('products.list', {}, authState.token);
       if (handleAuthError(res.message)) return;
-      
       if (res.success) {
-         // Hanya tampilkan produk aktif di POS
          catalog.value = res.data.filter(p => p.status === 'Active');
       }
       loadingCatalog.value = false;
     };
 
-    // Fungsi Tambah/Ubah Qty Keranjang
     const addFromCatalog = (prod) => {
       if (prod.stock <= 0) {
         scanError.value = `Stok ${prod.name} habis.`;
+        setTimeout(() => scanError.value = '', 3000);
         return;
       }
-      
       const existingIdx = cart.value.findIndex(item => item.product.id === prod.id);
-      
       if (existingIdx !== -1) {
-        // Cek limit stok
         if (cart.value[existingIdx].qty + 1 > prod.stock) {
            scanError.value = `Maksimal stok tercapai untuk ${prod.name}`;
            setTimeout(() => scanError.value = '', 3000);
@@ -366,18 +342,14 @@ const PosView = {
         cart.value[existingIdx].qty++;
         cart.value[existingIdx].subtotal = cart.value[existingIdx].qty * prod.price;
       } else {
-        cart.value.push({
+        cart.value.unshift({ // Tambah di paling atas agar terlihat jelas
           product: prod,
           qty: 1,
           unit_price: prod.price,
           subtotal: prod.price
         });
       }
-      scanError.value = ''; // clear error
-      
-      // Auto scroll ke bawah di keranjang (opsional perbaikan UI)
-      // Fokus kembali ke scanner agar kasir bisa langsung tembak barang berikutnya
-      focusScanner();
+      scanError.value = ''; 
     };
 
     const increaseQty = (idx) => {
@@ -387,7 +359,6 @@ const PosView = {
         item.subtotal = item.qty * item.product.price;
       }
     };
-
     const decreaseQty = (idx) => {
       const item = cart.value[idx];
       if (item.qty > 1) {
@@ -397,20 +368,9 @@ const PosView = {
         removeFromCart(idx);
       }
     };
+    const removeFromCart = (idx) => cart.value.splice(idx, 1);
+    const clearCart = () => { cart.value = []; paymentAmount.value = ''; scanError.value = ''; checkoutError.value = ''; };
 
-    const removeFromCart = (idx) => {
-      cart.value.splice(idx, 1);
-    };
-
-    const clearCart = () => {
-      cart.value = [];
-      paymentAmount.value = '';
-      scanError.value = '';
-      checkoutError.value = '';
-      focusScanner();
-    };
-
-    // FUNGSI SCANNER (Terhubung API & Lokal)
     const handleScan = async () => {
       const code = barcodeQuery.value.trim();
       if (!code) return;
@@ -418,9 +378,7 @@ const PosView = {
       isScanning.value = true;
       scanError.value = '';
 
-      // Optimasi: Coba cari di katalog lokal dulu untuk menghemat kuota GAS
       const localMatch = catalog.value.find(p => p.barcode === code);
-      
       if (localMatch) {
          addFromCatalog(localMatch);
          isScanning.value = false;
@@ -428,187 +386,121 @@ const PosView = {
          return;
       }
 
-      // Jika tidak ada di lokal (misal katalog belum sync), tembak API backend
       const res = await apiRequest('products.getByBarcode', { barcode: code }, authState.token);
-      
-      if (handleAuthError(res.message)) {
-         isScanning.value = false;
-         return;
-      }
+      if (handleAuthError(res.message)) { isScanning.value = false; return; }
 
       if (res.success) {
          addFromCatalog(res.data);
       } else {
          scanError.value = res.message || 'Barcode tidak dikenali.';
+         setTimeout(() => scanError.value = '', 3000);
       }
-      
       isScanning.value = false;
       barcodeQuery.value = '';
-      focusScanner();
     };
 
-    // [REVISI] Logika Integrasi HTML5-QRCode
     const startCamera = () => {
       scanError.value = '';
-      if (html5QrCode) { stopCamera(); } 
-      
-      // BUGFIX: Tampilkan div container TERLEBIH DAHULU sebelum library diinisialisasi
-      // Jika div masih display:none (karena v-show=false), ukuran video akan menjadi 0x0 (Blank Hitam).
-      isCameraActive.value = true;
-
-      // Tunggu DOM merender div tersebut (sedikit jeda 100ms)
+      showScannerModal.value = true;
       setTimeout(async () => {
         try {
           html5QrCode = new Html5Qrcode("qr-reader"); 
           await html5QrCode.start(
-            { facingMode: "environment" }, // Prioritaskan kamera belakang (HP/Tablet)
+            { facingMode: "environment" }, 
             {
               fps: 10, 
-              qrbox: { width: 250, height: 150 }, 
-              aspectRatio: 1.777778,
-              formatsToSupport: [
-                Html5QrcodeSupportedFormats.EAN_13,
-                Html5QrcodeSupportedFormats.EAN_8,
-                Html5QrcodeSupportedFormats.UPC_A,
-                Html5QrcodeSupportedFormats.UPC_E,
-                Html5QrcodeSupportedFormats.CODE_128,
-                Html5QrcodeSupportedFormats.CODE_39,
-                Html5QrcodeSupportedFormats.QR_CODE
-              ]
+              qrbox: { width: 250, height: 120 }, 
+              experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true // SANGAT MEMBANTU BACA BARCODE 1D DI HP
+              }
             },
             onScanSuccess,
             (errorMessage) => { /* Abaikan error per frame */ }
           );
         } catch (err) {
-          scanError.value = "Gagal mengakses kamera. Pastikan izin kamera diberikan ke browser.";
-          console.error("Camera access error:", err);
-          isCameraActive.value = false;
+          scanError.value = "Gagal mengakses kamera. Gunakan HP untuk fokus kamera yang lebih baik.";
+          showScannerModal.value = false;
         }
-      }, 100);
+      }, 150);
     };
 
     const stopCamera = async () => {
-      try {
-        if (html5QrCode) {
+      if (html5QrCode) {
+        try {
           await html5QrCode.stop();
           html5QrCode.clear();
-        }
-      } catch (err) {
-        console.error("Gagal menghentikan kamera", err);
-      } finally {
-        isCameraActive.value = false;
-        html5QrCode = null;
+        } catch (err) {}
       }
+      showScannerModal.value = false;
+      html5QrCode = null;
     };
 
-    const onScanSuccess = (decodedText, decodedResult) => {
-      // Debounce manual: Cegah trigger berkali-kali untuk 1 item dalam 2 detik
+    const onScanSuccess = (decodedText) => {
       const now = Date.now();
-      if (now - lastScanTime < 2000) return;
+      if (now - lastScanTime < 2000) return; // Jeda 2 detik antar scan barang yang sama
       lastScanTime = now;
 
-      // UX: Bunyikan BEEP singkat via Web Audio API saat terbaca
+      // Beep Sukses
       try {
          const ctx = new (window.AudioContext || window.webkitAudioContext)();
          const osc = ctx.createOscillator();
          osc.connect(ctx.destination);
-         osc.frequency.value = 800; // Frekuensi Beep scanner kasir
+         osc.frequency.value = 800; 
          osc.start();
-         osc.stop(ctx.currentTime + 0.1); // Durasi 0.1 detik
+         osc.stop(ctx.currentTime + 0.1); 
       } catch(e) {}
 
-      // Masukkan hasil scan ke kolom input dan trigger API pencarian
       barcodeQuery.value = decodedText;
       handleScan(); 
-    };
-    // [END REVISI]
-
-    // Metode Pembayaran Cepat
-    const setExactAmount = () => {
-      paymentAmount.value = cartTotalAmount.value;
+      // JANGAN PANGGIL stopCamera() di sini agar kasir bisa terus scan barang berikutnya!
     };
 
-    const addAmount = (amt) => {
-      const current = parseFloat(paymentAmount.value) || 0;
-      paymentAmount.value = current + amt;
-    };
+    const setExactAmount = () => paymentAmount.value = cartTotalAmount.value;
+    const addAmount = (amt) => paymentAmount.value = (parseFloat(paymentAmount.value) || 0) + amt;
 
-    // PROSES CHECKOUT INTI
     const processCheckout = async () => {
-      if (cart.value.length === 0) return;
-      if (changeAmount.value < 0) {
-        checkoutError.value = 'Uang pembayaran kurang dari total belanja.';
-        return;
-      }
-
+      if (cart.value.length === 0 || changeAmount.value < 0) return;
       checkoutError.value = '';
       isCheckingOut.value = true;
 
-      // Bentuk Payload sesuai Contract API `pos.checkout`
       const payload = {
         payment_amount: parseFloat(paymentAmount.value),
-        items: cart.value.map(item => ({
-          product_id: item.product.id,
-          qty: item.qty
-        }))
+        items: cart.value.map(item => ({ product_id: item.product.id, qty: item.qty }))
       };
 
       const res = await apiRequest('pos.checkout', payload, authState.token);
-      
       isCheckingOut.value = false;
-
       if (handleAuthError(res.message)) return;
 
-      if (!res.success) {
-        checkoutError.value = res.message;
-        return;
-      }
-
-      // Berhasil
+      if (!res.success) { checkoutError.value = res.message; return; }
+      
       lastTransaction.value = res.data;
       showSuccessModal.value = true;
       
-      // Update stok di katalog lokal agar UI tidak perlu reload
       cart.value.forEach(item => {
         const catIdx = catalog.value.findIndex(p => p.id === item.product.id);
-        if (catIdx !== -1) {
-           catalog.value[catIdx].stock -= item.qty;
-        }
+        if (catIdx !== -1) catalog.value[catIdx].stock -= item.qty;
       });
     };
 
-    const resetPos = () => {
-      showSuccessModal.value = false;
-      clearCart();
-    };
-
-    const printReceipt = () => {
-      // Dummy print function untuk MVP Web, di lapangan biasanya konek Bluetooth/USB thermal
-      alert(`Mencetak Struk: ${lastTransaction.value.receipt_no}\nMohon hubungkan printer thermal.`);
-    };
-
+    const resetPos = () => { showSuccessModal.value = false; clearCart(); };
+    const printReceipt = () => alert(`Mencetak Struk: ${lastTransaction.value.receipt_no}`);
+    
     const focusScanner = () => {
-       if (barcodeInputRef.value) {
-         // Pakai set timeout agar render DOM selesai
-         setTimeout(() => barcodeInputRef.value.focus(), 50);
-       }
+       if (barcodeInputRef.value && !showScannerModal.value) setTimeout(() => barcodeInputRef.value.focus(), 50);
     };
 
-    // Keyboard Shortcuts Global untuk Kasir (F2, F10)
     const handleKeydown = (e) => {
       if (showSuccessModal.value) {
         if (e.key === 'Enter' || e.key === 'Escape') resetPos();
         return;
       }
-
       if (e.key === 'F2') {
         e.preventDefault();
         focusScanner();
       } else if (e.key === 'F10') {
         e.preventDefault();
-        if (cart.value.length > 0 && changeAmount.value >= 0 && !isCheckingOut.value) {
-          processCheckout();
-        }
+        if (cart.value.length > 0 && changeAmount.value >= 0 && !isCheckingOut.value) processCheckout();
       }
     };
 
@@ -620,43 +512,16 @@ const PosView = {
 
     onUnmounted(() => {
       window.removeEventListener('keydown', handleKeydown);
-      // [REVISI] Matikan kamera secara paksa jika kasir pindah tab ke riwayat dsb
       stopCamera();
     });
 
     return {
-      catalog,
-      loadingCatalog,
-      catalogQuery,
-      filteredCatalog,
-      barcodeInputRef,
-      barcodeQuery,
-      isScanning,
-      scanError,
-      isCameraActive, // [REVISI] Expose state ke template
-      cart,
-      paymentAmount,
-      isCheckingOut,
-      checkoutError,
-      showSuccessModal,
-      lastTransaction,
-      cartTotalAmount,
-      cartTotalItems,
-      changeAmount,
-      formatRupiah,
-      addFromCatalog,
-      increaseQty,
-      decreaseQty,
-      removeFromCart,
-      clearCart,
-      handleScan,
-      startCamera, // [REVISI]
-      stopCamera,  // [REVISI]
-      setExactAmount,
-      addAmount,
-      processCheckout,
-      resetPos,
-      printReceipt
+      catalog, loadingCatalog, catalogQuery, filteredCatalog, barcodeInputRef, barcodeQuery, isScanning, scanError,
+      showScannerModal, cart, paymentAmount, isCheckingOut, checkoutError, showSuccessModal, lastTransaction,
+      cartTotalAmount, cartTotalItems, changeAmount, formatRupiah, addFromCatalog, increaseQty, decreaseQty,
+      removeFromCart, clearCart, handleScan, startCamera, stopCamera, setExactAmount, addAmount, processCheckout,
+      resetPos, printReceipt
     };
   }
 };
+
