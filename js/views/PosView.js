@@ -419,16 +419,16 @@ const PosView = {
           console.log("[POS] Library Html5Qrcode berhasil dimuat.");
 
           html5QrCode.start(
-            { facingMode: "environment" },
+            { facingMode: "environment" }, 
             {
               fps: 10,
-              qrbox: { width: 250, height: 150 },
-              formatsToSupport: [
-                 Html5QrcodeSupportedFormats.EAN_13,
-                 Html5QrcodeSupportedFormats.EAN_8,
-                 Html5QrcodeSupportedFormats.CODE_128,
-                 Html5QrcodeSupportedFormats.UPC_A
-              ]
+              // Perlebar area scan untuk barcode memanjang
+              qrbox: { width: 300, height: 150 },
+              // FITUR RAHASIA: Gunakan scanner bawaan HP/Chrome jika tersedia (Sangat Cepat)
+              experimentalFeatures: {
+                useBarCodeDetectorIfSupported: true
+              }
+              // HAPUS formatsToSupport agar dia mau baca SEMUA jenis barcode
             },
             (decodedText) => {
               console.log("[POS] YES! BARCODE KETEMU: ", decodedText);
