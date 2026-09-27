@@ -257,6 +257,7 @@ const UserView = {
       </div>
 
       <!-- MODAL FORM PENGGUNA -->
+      <teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="closeModal">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
           
@@ -354,8 +355,10 @@ const UserView = {
           </div>
         </div>
       </div>
+      </teleport>
 
       <!-- MODAL HAPUS / BLOKIR -->
+      <teleport to="body">
       <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="showDeleteModal = false">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden transform transition-all text-center">
           <div class="p-6">
@@ -377,6 +380,7 @@ const UserView = {
           </div>
         </div>
       </div>
+      </teleport>
 
     </div>
   `,
