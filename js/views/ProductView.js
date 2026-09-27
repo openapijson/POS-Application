@@ -1,4 +1,5 @@
 const { onMounted } = Vue;
+// Hapus baris paling atas: const { ref, computed, onMounted, onUnmounted } = Vue;
 
 const ProductView = {
   name: 'ProductView',
@@ -183,11 +184,18 @@ const ProductView = {
                   
                   <div>
                     <label class="text-xs font-semibold text-slate-700 block mb-1.5">Barcode / Kode Batang <span class="text-red-500">*</span></label>
-                    <div class="relative">
-                      <input type="text" v-model="formData.barcode" required :disabled="actionLoading"
-                        class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brandprimary/50 focus:border-brandprimary font-mono placeholder:font-sans" 
-                        placeholder="Scan atau ketik barcode...">
-                      <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-300">barcode_reader</span>
+                    <div class="flex items-center gap-2">
+                      <div class="relative flex-1">
+                        <input type="text" v-model="formData.barcode" required :disabled="actionLoading"
+                          class="w-full pl-4 pr-10 py-2.5 bg-white border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-brandprimary/50 focus:border-brandprimary font-mono placeholder:font-sans" 
+                          placeholder="Ketik barcode...">
+                        <span class="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-300">barcode_reader</span>
+                      </div>
+                      <!-- TOMBOL SCAN KHUSUS PRODUK -->
+                      <button type="button" @click="startScanner" :disabled="actionLoading"
+                              class="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-white rounded-lg flex items-center justify-center transition-colors shadow-sm disabled:opacity-50" title="Scan pakai Kamera">
+                         <span class="material-symbols-outlined text-[18px]">qr_code_scanner</span>
+                      </button>
                     </div>
                   </div>
 
@@ -286,7 +294,32 @@ const ProductView = {
         </div>
       </div>
 
-      <!-- MODAL HAPUS (Strict Structure) -->
+      <!-- MODAL SCANNER KHUSUS PRODUK (Z-INDEX SUPER TINGGI) -->
+      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700">
+           
+           <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+             <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+               <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
+               Scan Barcode
+             </h3>
+             <button type="button" @click="stopScanner" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
+               <span class="material-symbols-outlined text-[18px]">close</span>
+             </button>
+           </div>
+           
+           <!-- Wadah Video Kamera -->
+           <div class="p-4 bg-slate-900 relative flex items-center justify-center min-h-[250px]">
+              <div id="product-qr-reader" class="w-full rounded-xl overflow-hidden shadow-inner"></div>
+           </div>
+           
+           <div class="p-4 bg-white text-xs text-slate-500 font-medium">
+             Arahkan kamera ke barcode produk. Sistem akan membaca secara otomatis.
+           </div>
+        </div>
+      </div>
+
+      <!-- MODAL HAPUS -->
       <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="showDeleteModal = false">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden transform transition-all text-center">
           <div class="p-6">
@@ -313,7 +346,7 @@ const ProductView = {
   `,
 
   setup() {
-    const { ref, computed, onMounted } = Vue; // Pindahkan ke sini
+    const { ref, computed, onMounted, onUnmounted } = Vue; 
     
     // UI State
     const loading = ref(true);
@@ -336,13 +369,17 @@ const ProductView = {
       category: '',
       price: '',
       stock: '',
-      image_base64: null, // Dikirim ke server
-      image_preview: null // Preview lokal
+      image_base64: null, 
+      image_preview: null 
     });
 
     // Delete Modal State
     const showDeleteModal = ref(false);
     const productToDelete = ref(null);
+
+    // Scanner Modal State
+    const showScannerModal = ref(false);
+    let html5QrCode = null;
 
     // Helpers UI Computed
     const uniqueCategories = computed(() => {
@@ -352,8 +389,6 @@ const ProductView = {
 
     const filteredProducts = computed(() => {
       let result = products.value;
-      
-      // Filter produk aktif saja (Soft delete protection dari frontend walau backend jg filter)
       result = result.filter(p => p.status === 'Active');
 
       if (filterCategory.value) {
@@ -434,14 +469,14 @@ const ProductView = {
         category: prod.category,
         price: prod.price,
         stock: prod.stock,
-        image_base64: null, // Jangan kirim gambar lama, kecuali user upload ulang
-        image_preview: prod.image_file_id ? `https://drive.google.com/thumbnail?id=${prod.image_file_id}&sz=w800` : prod.image_url // Tampilkan gambar dari DB untuk preview
+        image_base64: null, 
+        image_preview: prod.image_file_id ? `https://drive.google.com/thumbnail?id=${prod.image_file_id}&sz=w800` : prod.image_url 
       };
       showModal.value = true;
     };
 
     const closeModal = () => {
-      if (actionLoading.value) return; // Kunci modal jika sedang proses
+      if (actionLoading.value) return; 
       showModal.value = false;
     };
 
@@ -449,16 +484,14 @@ const ProductView = {
       const file = event.target.files[0];
       if (!file) return;
       
-      // Validasi ukuran max 2MB (2 * 1024 * 1024 bytes)
       if (file.size > 2097152) {
         modalError.value = 'Ukuran foto maksimal 2MB. Silakan pilih foto lain yang lebih kecil.';
-        event.target.value = ''; // reset input
+        event.target.value = ''; 
         return;
       }
       
       modalError.value = '';
       
-      // Konversi ke Base64 menggunakan FileReader (Standar HTML5)
       const reader = new FileReader();
       reader.onload = (e) => {
          formData.value.image_preview = e.target.result;
@@ -486,7 +519,7 @@ const ProductView = {
         category: formData.value.category,
         price: formData.value.price,
         stock: formData.value.stock,
-        image_base64: formData.value.image_base64 // Hanya terisi jika ada upload baru
+        image_base64: formData.value.image_base64 
       };
 
       const action = modalMode.value === 'add' ? 'products.create' : 'products.update';
@@ -501,9 +534,8 @@ const ProductView = {
         return;
       }
 
-      // GRANULAR UPDATE: Mutasi state lokal, JANGAN over-fetch (fetch ulang seluruh tabel)
       if (modalMode.value === 'add') {
-        products.value.unshift(res.data); // Taruh di paling atas
+        products.value.unshift(res.data); 
       } else {
         const idx = products.value.findIndex(p => p.id === res.data.id);
         if (idx !== -1) {
@@ -533,15 +565,65 @@ const ProductView = {
         return;
       }
 
-      // GRANULAR UPDATE: Hapus dari array lokal
       products.value = products.value.filter(p => p.id !== productToDelete.value.id);
       
       showDeleteModal.value = false;
       productToDelete.value = null;
     };
 
+    // LOGIKA SCANNER KAMERA KHUSUS PRODUK
+    const startScanner = () => {
+      showScannerModal.value = true;
+      
+      // Tunggu DOM modal ter-render
+      setTimeout(async () => {
+        try {
+          html5QrCode = new Html5Qrcode("product-qr-reader");
+          await html5QrCode.start(
+            { facingMode: "environment" },
+            { fps: 10, qrbox: { width: 250, height: 100 } },
+            (decodedText) => {
+              // Sukses scan: isi input, bunyikan BEEP, lalu tutup kamera otomatis
+              try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                osc.connect(ctx.destination);
+                osc.frequency.value = 800;
+                osc.start();
+                osc.stop(ctx.currentTime + 0.1);
+              } catch(e) {}
+              
+              formData.value.barcode = decodedText;
+              stopScanner();
+            },
+            (err) => { /* Abaikan pesan error frame-by-frame */ }
+          );
+        } catch (err) {
+          console.error("Gagal menyalakan kamera", err);
+          alert("Gagal mengakses kamera. Pastikan izin browser diberikan.");
+          stopScanner();
+        }
+      }, 150); // Beri jeda 150ms
+    };
+
+    const stopScanner = async () => {
+      if (html5QrCode) {
+        try {
+          await html5QrCode.stop();
+        } catch(e) { console.warn("Error stopping scanner", e); }
+        html5QrCode.clear();
+        html5QrCode = null;
+      }
+      showScannerModal.value = false;
+    };
+
     onMounted(() => {
       loadProducts();
+    });
+
+    onUnmounted(() => {
+      // Pastikan memori kamera dibersihkan kalau user tiba-tiba ganti halaman saat modal masih buka
+      stopScanner();
     });
 
     return {
@@ -559,6 +641,7 @@ const ProductView = {
       formData,
       showDeleteModal,
       productToDelete,
+      showScannerModal, // Export state
       formatRupiah,
       getStockStatusClass,
       getStockStatusDotClass,
@@ -572,7 +655,9 @@ const ProductView = {
       clearImage,
       submitForm,
       confirmDelete,
-      executeDelete
+      executeDelete,
+      startScanner, // Export fungsi
+      stopScanner   // Export fungsi
     };
   }
 };

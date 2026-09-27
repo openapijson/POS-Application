@@ -448,33 +448,39 @@ const PosView = {
     };
 
     // [REVISI] Logika Integrasi HTML5-QRCode
-    const startCamera = async () => {
-      try {
-        scanError.value = '';
-        if (html5QrCode) { await stopCamera(); } // Pastikan instance bersih
-        
-        // Target ID div yang kita buat di template
-        html5QrCode = new Html5Qrcode("qr-reader"); 
-        await html5QrCode.start(
-          { facingMode: "environment" }, // Prioritaskan kamera belakang (HP/Tablet)
-          {
-            fps: 10, // Frame per second pembacaan
-            qrbox: { width: 250, height: 150 }, // Batasan area fokus baca
-            aspectRatio: 1.777778
-          },
-          onScanSuccess,
-          (errorMessage) => { /* Abaikan error tiap frame yang gagal baca barcode */ }
-        );
-        isCameraActive.value = true;
-      } catch (err) {
-        scanError.value = "Gagal mengakses kamera. Pastikan izin kamera diberikan ke browser.";
-        console.error("Camera access error:", err);
-      }
+    const startCamera = () => {
+      scanError.value = '';
+      if (html5QrCode) { stopCamera(); } 
+      
+      // BUGFIX: Tampilkan div container TERLEBIH DAHULU sebelum library diinisialisasi
+      // Jika div masih display:none (karena v-show=false), ukuran video akan menjadi 0x0 (Blank Hitam).
+      isCameraActive.value = true;
+
+      // Tunggu DOM merender div tersebut (sedikit jeda 100ms)
+      setTimeout(async () => {
+        try {
+          html5QrCode = new Html5Qrcode("qr-reader"); 
+          await html5QrCode.start(
+            { facingMode: "environment" }, // Prioritaskan kamera belakang (HP/Tablet)
+            {
+              fps: 10, 
+              qrbox: { width: 250, height: 150 }, 
+              aspectRatio: 1.777778
+            },
+            onScanSuccess,
+            (errorMessage) => { /* Abaikan error per frame */ }
+          );
+        } catch (err) {
+          scanError.value = "Gagal mengakses kamera. Pastikan izin kamera diberikan ke browser.";
+          console.error("Camera access error:", err);
+          isCameraActive.value = false;
+        }
+      }, 100);
     };
 
     const stopCamera = async () => {
       try {
-        if (html5QrCode && isCameraActive.value) {
+        if (html5QrCode) {
           await html5QrCode.stop();
           html5QrCode.clear();
         }
