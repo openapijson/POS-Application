@@ -71,7 +71,7 @@ const PosView = {
                  :class="prod.stock > 0 ? 'hover:border-brandprimary/50 hover:shadow-md hover:shadow-brandprimary/10 bg-white' : 'bg-slate-50 opacity-60 cursor-not-allowed'">
                  
                  <div class="w-full aspect-square bg-slate-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
-                   <img v-if="prod.image_file_id" :src="'https://drive.google.com/uc?export=view&id=' + prod.image_file_id" class="w-full h-full object-cover">
+                   <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" class="w-full h-full object-cover">
                    <span v-else class="material-symbols-outlined text-slate-300 text-3xl">inventory_2</span>
                    
                    <div class="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm backdrop-blur-sm"
