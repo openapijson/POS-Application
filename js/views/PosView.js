@@ -117,7 +117,7 @@ const PosView = {
 
           <div v-else v-for="(item, index) in cart" :key="item.product.id" class="p-3 bg-white border border-slate-200 rounded-xl flex gap-3 shadow-sm relative group animate-fade-in-up" style="animation-duration: 0.2s">
             <div class="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-100">
-               <img v-if="item.product.image_file_id" :src="'https://drive.google.com/uc?export=view&id=' + item.product.image_file_id" class="w-full h-full object-cover">
+              <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" class="w-full h-full object-cover">
                <span v-else class="material-symbols-outlined text-slate-300 flex items-center justify-center w-full h-full text-xl">image</span>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-between">
