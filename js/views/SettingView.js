@@ -272,7 +272,6 @@ const SettingView = {
             
             <div class="p-6 space-y-6">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Checkboxes -->
                 <label class="flex items-start gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
                   <div class="relative flex items-center mt-0.5">
                     <input type="checkbox" v-model="form.showLogo" class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 checked:border-brandprimary checked:bg-brandprimary transition-all">
@@ -316,6 +315,28 @@ const SettingView = {
                     <p class="text-[10px] text-slate-500">Pindai cepat untuk proses retur barang</p>
                   </div>
                 </label>
+
+                <label class="flex items-start gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+                  <div class="relative flex items-center mt-0.5">
+                    <input type="checkbox" v-model="form.showQris" class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 checked:border-brandprimary checked:bg-brandprimary transition-all">
+                    <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-[16px]">check</span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800">QRIS Dinamis / Validasi e-Receipt</p>
+                    <p class="text-[10px] text-slate-500">Cetak QR Code di kaki struk</p>
+                  </div>
+                </label>
+
+                <label class="flex items-start gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer transition-colors">
+                  <div class="relative flex items-center mt-0.5">
+                    <input type="checkbox" v-model="form.showReturPolicy" class="peer h-5 w-5 cursor-pointer appearance-none rounded border border-slate-300 checked:border-brandprimary checked:bg-brandprimary transition-all">
+                    <span class="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none material-symbols-outlined text-[16px]">check</span>
+                  </div>
+                  <div>
+                    <p class="text-sm font-bold text-slate-800">Pesan Retur & Kebijakan Toko</p>
+                    <p class="text-[10px] text-slate-500">Ketentuan penukaran barang maks 1x24 jam</p>
+                  </div>
+                </label>
               </div>
 
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -330,6 +351,88 @@ const SettingView = {
               </div>
             </div>
           </div>
+
+          <!-- Card 4: Otomatisasi Laci Kasir & Cutter -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="p-5 border-b border-slate-100 flex items-center gap-3 bg-slate-50/50">
+              <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                <span class="material-symbols-outlined">point_of_sale</span>
+              </div>
+              <div>
+                <h2 class="text-base font-bold text-slate-800">Otomatisasi Laci Kasir & Cutter</h2>
+                <p class="text-xs text-slate-500">Trigger elektrik konektor RJ11 cash drawer dan pisau pemotong otomatis</p>
+              </div>
+            </div>
+            
+            <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+              
+              <div class="flex items-start justify-between p-4 border border-slate-100 rounded-xl bg-slate-50/50">
+                <div class="pr-4">
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">Auto-Kick Cash Drawer</h4>
+                  <p class="text-[10px] text-slate-500 mb-2">Mengirim sinyal pulse RJ11 Pin 2 (ESC p 0 25 250 - 24V 100ms) saat kasir menekan tombol "Bayar Tunai".</p>
+                  <span class="text-[9px] font-mono text-emerald-600 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">bolt</span> Pulse Command: ESC p 0 25 250</span>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                  <input type="checkbox" v-model="form.autoKickDrawer" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brandprimary"></div>
+                </label>
+              </div>
+
+              <div class="p-4 border border-slate-100 rounded-xl bg-slate-50/50">
+                <h4 class="text-sm font-bold text-slate-800 mb-2">Metode Pemotong (Auto-Cutter)</h4>
+                <div class="grid grid-cols-3 gap-2">
+                  <label class="relative cursor-pointer">
+                    <input type="radio" v-model="form.cutMethod" value="Partial" class="peer sr-only" name="cut">
+                    <div class="py-2 border border-slate-200 rounded-lg text-center peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary bg-white transition-all">
+                      <div class="w-4 h-4 mx-auto mb-1 border rounded-full peer-checked:border-4 peer-checked:border-brandprimary"></div>
+                      <p class="text-[10px] font-bold text-slate-700">Partial Cut</p>
+                      <p class="text-[8px] text-slate-400">Sisa 2mm</p>
+                    </div>
+                  </label>
+                  <label class="relative cursor-pointer">
+                    <input type="radio" v-model="form.cutMethod" value="Full" class="peer sr-only" name="cut">
+                    <div class="py-2 border border-slate-200 rounded-lg text-center peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary bg-white transition-all">
+                      <div class="w-4 h-4 mx-auto mb-1 border rounded-full peer-checked:border-4 peer-checked:border-brandprimary"></div>
+                      <p class="text-[10px] font-bold text-slate-700">Full Cut</p>
+                      <p class="text-[8px] text-slate-400">Lepas Total</p>
+                    </div>
+                  </label>
+                  <label class="relative cursor-pointer">
+                    <input type="radio" v-model="form.cutMethod" value="Manual" class="peer sr-only" name="cut">
+                    <div class="py-2 border border-slate-200 rounded-lg text-center peer-checked:border-brandprimary peer-checked:ring-1 peer-checked:ring-brandprimary bg-white transition-all">
+                      <div class="w-4 h-4 mx-auto mb-1 border rounded-full peer-checked:border-4 peer-checked:border-brandprimary"></div>
+                      <p class="text-[10px] font-bold text-slate-700">Manual</p>
+                      <p class="text-[8px] text-slate-400">Tear-Bar</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div class="flex items-start justify-between p-4 border border-slate-100 rounded-xl bg-slate-50/50">
+                <div class="pr-4">
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">Cetak Rangkap 2 (Merchant Copy)</h4>
+                  <p class="text-[10px] text-slate-500">Khusus transaksi Non-Tunai / EDC / QRIS untuk arsip.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                  <input type="checkbox" v-model="form.printDuplicate" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brandprimary"></div>
+                </label>
+              </div>
+
+              <div class="flex items-start justify-between p-4 border border-slate-100 rounded-xl bg-slate-50/50">
+                <div class="pr-4">
+                  <h4 class="text-sm font-bold text-slate-800 mb-1">Bunyi Beeper Selesai Cetak</h4>
+                  <p class="text-[10px] text-slate-500">Bunyikan internal buzzer printer 1x sebagai tanda selesai.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
+                  <input type="checkbox" v-model="form.playBeeper" class="sr-only peer">
+                  <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brandprimary"></div>
+                </label>
+              </div>
+
+            </div>
+          </div>
+
         </div>
 
         <!-- Kolom Kanan: Pratinjau & Panel Uji (1/3 width) -->
@@ -363,43 +466,57 @@ const SettingView = {
                 <!-- Konten Struk Monospace -->
                 <div class="font-mono text-[9px] sm:text-[10px] leading-tight text-slate-800 flex flex-col items-center w-full print-content">
                   
+                  <!-- Logo Mock -->
+                  <div v-if="form.showLogo" class="w-12 h-12 bg-slate-800 text-white flex items-center justify-center mb-3 hide-on-print">
+                    <span class="material-symbols-outlined text-2xl">receipt</span>
+                  </div>
+                  
                   <div class="text-center whitespace-pre-line mb-3 font-bold">
                     {{ form.headerText || 'NAMA TOKO ANDA' }}
                   </div>
 
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-2 text-[8px] sm:text-[9px]">
-                    <div class="flex justify-between" v-if="form.showRegister"><span>NO: TRX-20250524-014X</span><span>{{ new Date().toLocaleDateString('id-ID') }}</span></div>
-                    <div class="flex justify-between" v-if="form.showRegister"><span>KASIR: Budi Santoso</span><span>REG: #01</span></div>
+                    <div class="flex justify-between" v-if="form.showRegister"><span>NO: {{ dummyTrx.receipt_no }}</span><span>{{ formatDate(dummyTrx.created_at) }}</span></div>
+                    <div class="flex justify-between" v-if="form.showRegister"><span>KASIR: {{ dummyTrx.kasir_name }}</span><span>REG: #01</span></div>
                     <div class="text-center mt-1" v-if="form.showNpwp">NPWP: 01.852.482.9-021.000</div>
                   </div>
 
                   <!-- Dummy Items -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-2 space-y-1.5">
-                    <div>
-                      <div class="flex justify-between font-bold"><span>Kopi Arabika 250g</span><span>Rp 75.000</span></div>
-                      <div class="text-slate-500">1 pcs x Rp 75.000</div>
-                    </div>
-                    <div>
-                      <div class="flex justify-between font-bold"><span>Minyak Goreng Sawit 2L</span><span>Rp 38.500</span></div>
-                      <div class="text-slate-500">1 pcs x Rp 38.500</div>
+                    <div v-for="item in dummyTrx.items" :key="item.name">
+                      <div class="flex justify-between font-bold"><span>{{ item.name }}</span><span>{{ formatRupiah(item.subtotal) }}</span></div>
+                      <div class="text-slate-500">{{ item.qty }} pcs x {{ formatRupiah(item.unit_price) }}</div>
                     </div>
                   </div>
 
                   <!-- Dummy Totals -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-4 space-y-0.5">
-                    <div class="flex justify-between"><span>SUBTOTAL (2 ITEM)</span><span>Rp 113.500</span></div>
+                    <div class="flex justify-between"><span>SUBTOTAL ({{ dummyTrx.items.length }} ITEM)</span><span>{{ formatRupiah(dummyTrx.total_amount) }}</span></div>
                     <div class="flex justify-between font-bold text-[10px] sm:text-[11px] py-1 border-t border-b border-dashed border-slate-300 my-1">
-                      <span>TOTAL AKHIR</span><span>Rp 113.500</span>
+                      <span>TOTAL AKHIR</span><span>{{ formatRupiah(dummyTrx.total_amount) }}</span>
                     </div>
+                    <div class="flex justify-between"><span>TUNAI (CASH)</span><span>{{ formatRupiah(dummyTrx.payment_amount) }}</span></div>
+                    <div class="flex justify-between font-bold"><span>KEMBALIAN</span><span>{{ formatRupiah(dummyTrx.change_amount) }}</span></div>
                   </div>
 
                   <div v-if="form.showBarcode" class="flex flex-col items-center mb-3">
                     <div class="w-3/4 h-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIj48cGF0aCBkPSJNMTAgMTBoMTB2ODBIMTB6TTMwIDEwaDIwdjgwSDMweiM2MCAxMGg1djgwSDYweiM3NSAxMGgxMHY4MEg3NXpNOTUgMTBoMTV2ODBIMTV6IiBmaWxsPSIjMzMzIi8+PC9zdmc+')] bg-cover opacity-80"></div>
-                    <span class="text-[7px] mt-0.5 tracking-widest">*TRX-20250524-014X*</span>
+                    <span class="text-[7px] mt-0.5 tracking-widest">*{{ dummyTrx.receipt_no }}*</span>
+                  </div>
+                  
+                  <div v-if="form.showQris" class="flex flex-col items-center mb-3 hide-on-print">
+                    <div class="w-16 h-16 bg-slate-200 flex items-center justify-center p-1 border border-slate-300">
+                      <div class="w-full h-full border-4 border-slate-800 border-dashed"></div>
+                    </div>
+                    <span class="text-[7px] mt-1">SCAN E-RECEIPT / QRIS</span>
                   </div>
 
                   <div class="text-center whitespace-pre-line mt-2 text-[8px] sm:text-[9px]">
                     {{ form.footerText || 'Terima kasih atas kunjungan Anda!' }}
+                  </div>
+                  
+                  <div v-if="form.showReturPolicy" class="text-center mt-2 pt-2 border-t border-dashed border-slate-300 text-[8px] text-slate-500">
+                    Barang dapat ditukar maks 1x24 jam dengan membawa struk asli.
                   </div>
                 </div>
                 
@@ -433,7 +550,20 @@ const SettingView = {
     // Variabel Penahan Koneksi API Hardware Web
     let serialPort = null; 
     let bluetoothDevice = null;
-    let bluetoothCharacteristic = null;
+
+    // Data Dummy khusus untuk Pratinjau (agar tampilannya selalu cantik)
+    const dummyTrx = ref({
+       receipt_no: 'TRX-20250524-014X',
+       created_at: new Date().toISOString(),
+       kasir_name: authState.user?.full_name || 'Budi Santoso',
+       items: [
+         { name: 'Kopi Arabika 250g', qty: 1, unit_price: 75000, subtotal: 75000 },
+         { name: 'Minyak Goreng Sawit 2L', qty: 1, unit_price: 38500, subtotal: 38500 }
+       ],
+       total_amount: 113500,
+       payment_amount: 150000,
+       change_amount: 36500
+    });
 
     // Default Form Config
     const form = ref({
@@ -458,6 +588,22 @@ const SettingView = {
       printDuplicate: false,
       playBeeper: true
     });
+
+    // Format Helpers
+    const formatRupiah = (number) => {
+      if (isNaN(number) || number === null) return 'Rp 0';
+      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
+    };
+    
+    const formatDate = (iso) => {
+        if(!iso) return '';
+        return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    };
+    
+    const formatTime = (iso) => {
+        if(!iso) return '';
+        return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    };
 
     const parseBoolean = (val, defaultVal) => {
       if (val === 'true' || val === true) return true;
@@ -514,10 +660,9 @@ const SettingView = {
 
     // Kamus Kode Printer Thermal Mentah (Raw Bytes)
     const getPrinterCommands = (preset) => {
-      // Standar rata-rata ESC/POS
       const cmds = {
         Epson:    { init: [0x1B, 0x40], cut: [0x1D, 0x56, 0x41, 0x00], kick: [0x1B, 0x70, 0x00, 0x19, 0xFA] },
-        StarLine: { init: [0x1B, 0x40], cut: [0x1B, 0x64, 0x02],       kick: [0x1B, 0x07] }, // StarPRNT
+        StarLine: { init: [0x1B, 0x40], cut: [0x1B, 0x64, 0x02],       kick: [0x1B, 0x07] },
         Sunmi:    { init: [0x1B, 0x40], cut: [0x1D, 0x56, 0x42, 0x00], kick: [0x10, 0x14, 0x00, 0x00, 0x00] },
         Generic:  { init: [0x1B, 0x40], cut: [0x1D, 0x56, 0x01],       kick: [0x1B, 0x70, 0x00, 0x19, 0xFA] }
       };
@@ -547,10 +692,9 @@ const SettingView = {
           return;
         }
         try {
-          // Hanya mendukung printer BLE (Bluetooth Low Energy), bukan Classic SPP
           bluetoothDevice = await navigator.bluetooth.requestDevice({
              acceptAllDevices: true,
-             optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb'] // Service ID umum printer thermal BLE Tiongkok
+             optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
           });
           form.value.portOrIp = bluetoothDevice.name || `BLE_${bluetoothDevice.id.substring(0,8)}`;
           isHardwareConnected.value = true;
@@ -575,7 +719,6 @@ const SettingView = {
           const writer = serialPort.writable.getWriter();
           await writer.write(uint8Data);
           writer.releaseLock();
-          // Tutup koneksi agar port tidak hang jika aplikasi ditutup
           await serialPort.close(); 
           
        } else if (form.value.interfaceType === 'BT') {
@@ -585,7 +728,6 @@ const SettingView = {
           const services = await server.getPrimaryServices();
           if (services.length === 0) throw new Error("Tidak menemukan layanan BLE yang valid.");
           
-          // Cari slot penulisan data (Characteristic RX)
           const service = services[0]; 
           const characteristics = await service.getCharacteristics();
           let writeChar = null;
@@ -599,7 +741,6 @@ const SettingView = {
           await writeChar.writeValue(uint8Data);
           bluetoothDevice.gatt.disconnect();
        } else {
-          // Sinyal ping LAN palsu (karena browser tidak bisa hit IP lokal TCP/9100)
           console.log(`[LAN PING] Mengirim ${dataArray.length} bytes ke ${form.value.portOrIp}`);
           await new Promise(resolve => setTimeout(resolve, 800));
        }
@@ -610,11 +751,8 @@ const SettingView = {
       testingPort.value = true;
       try {
         const cmds = getPrinterCommands(form.value.printerPreset);
-        
-        // Gabungkan perintah: Inisialisasi -> Buka Laci -> Potong Kertas
         const payload = [...cmds.init, ...cmds.kick, ...cmds.cut];
         await sendRawData(payload);
-        
         showToast('Sinyal Hardware Berhasil Dikirim!');
       } catch (err) {
         showToast(`Gagal: ${err.message}`, 'error');
@@ -630,7 +768,6 @@ const SettingView = {
       try {
         const cmds = getPrinterCommands(form.value.printerPreset);
         
-        // Simulasi Raw Text ESC/POS (Tanpa formatting kompleks)
         const textToPrint = 
           "\\n" +
           "====== DECOUPLED POS ======\\n" +
@@ -641,10 +778,8 @@ const SettingView = {
           "Port   : " + (form.value.portOrIp || "Unknown") + "\\n" +
           "\\n\\nSukses! Perangkat terhubung.\\n\\n\\n";
         
-        // Ubah string jadi byte ASCII
         const textBytes = Array.from(textToPrint).map(c => c.charCodeAt(0));
         
-        // Init -> Teks -> Potong Kertas
         const payload = [...cmds.init, ...textBytes, ...cmds.cut];
         await sendRawData(payload);
         
