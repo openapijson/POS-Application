@@ -292,29 +292,29 @@ const ProductView = {
       </div>
 
       <!-- MODAL SCANNER KHUSUS PRODUK QUAGGAJS -->
-      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700">
+      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700 relative">
            
            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
-               Scan Barcode Produk
+               Pemindai Barcode (QuaggaJS)
              </h3>
              <button type="button" @click="stopScanner" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
                <span class="material-symbols-outlined text-[18px]">close</span>
              </button>
            </div>
            
-           <div class="p-4 bg-gray-900 relative">
+           <div class="p-4 bg-slate-900 relative">
               <!-- WADAH QUAGGA DENGAN KELAS CSS TAILWIND AGAR RESPONSIVE -->
-              <div id="product-qr-reader" class="w-full rounded-lg overflow-hidden border-2 border-gray-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
+              <div id="product-qr-reader" class="w-full rounded-lg overflow-hidden border-2 border-slate-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
                   <span v-if="cameraStarting" class="absolute material-symbols-outlined animate-spin text-white text-4xl z-0">progress_activity</span>
               </div>
            </div>
            
            <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
              <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
-             Arahkan kamera ke barcode produk (EAN/UPC).
+             Pastikan garis barcode terlihat jelas di layar.
            </div>
         </div>
       </div>
@@ -373,8 +373,11 @@ const ProductView = {
     // Scanner Modal State
     const showScannerModal = ref(false);
     const cameraStarting = ref(false);
+    
+    // --- TAMBAHAN UNTUK AKURASI 3x MATCH ---
+    let currentCode = ''; 
+    let scanMatchCount = 0;
 
-    // Helpers UI Computed
     const uniqueCategories = computed(() => {
       const cats = products.value.map(p => p.category).filter(c => c);
       return [...new Set(cats)].sort();
@@ -442,7 +445,6 @@ const ProductView = {
       loading.value = false;
     };
 
-    // Modal Handling
     const openAddModal = () => {
       modalMode.value = 'add';
       modalError.value = '';
@@ -564,7 +566,6 @@ const ProductView = {
       productToDelete.value = null;
     };
 
-    // LOGIKA SCANNER KAMERA QUAGGAJS (KHUSUS PRODUK)
     const startScanner = () => {
       showScannerModal.value = true;
       cameraStarting.value = true;
@@ -607,20 +608,33 @@ const ProductView = {
         // Event listener saat barcode ditemukan
         Quagga.onDetected((data) => {
           const code = data.codeResult.code;
-          console.log("[PRODUK] BARCODE KETEMU:", code);
           
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.connect(ctx.destination);
-            osc.frequency.value = 800;
-            osc.start();
-            osc.stop(ctx.currentTime + 0.1);
-          } catch(e) {}
-          
-          // Masukkan kode ke form dan tutup kamera
-          formData.value.barcode = code;
-          stopScanner();
+          // LOGIKA AKURASI: Pastikan membaca kode yang SAMA 3 kali berturut-turut
+          if (code === currentCode) {
+            scanMatchCount++;
+          } else {
+            scanMatchCount = 1;
+            currentCode = code;
+          }
+
+          // Jika kode sudah stabil dibaca 3x berturut-turut, baru anggap VALID
+          if (scanMatchCount >= 3) {
+            console.log("[PRODUK] BARCODE VALID KETEMU:", code);
+            scanMatchCount = 0; // Reset hitungan
+            
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              osc.connect(ctx.destination);
+              osc.frequency.value = 800;
+              osc.start();
+              osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+            
+            // Masukkan kode ke form dan tutup kamera
+            formData.value.barcode = code;
+            stopScanner();
+          }
         });
       }, 500);
     };

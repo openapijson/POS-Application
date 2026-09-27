@@ -299,6 +299,10 @@ const PosView = {
     const cameraStarting = ref(false);
     let lastScanCode = '';
     let lastScanTime = 0; 
+    
+    // --- TAMBAHAN UNTUK AKURASI 3x MATCH ---
+    let currentCode = ''; 
+    let scanMatchCount = 0;
 
     // State Cart
     const cart = ref([]);
@@ -401,7 +405,6 @@ const PosView = {
       barcodeQuery.value = '';
     };
 
-    // LOGIKA SCANNER KAMERA QUAGGAJS (KHUSUS POS)
     const startCamera = () => {
       scanError.value = '';
       showScannerModal.value = true;
@@ -445,27 +448,40 @@ const PosView = {
         // Event listener saat barcode ditemukan
         Quagga.onDetected((data) => {
           const code = data.codeResult.code;
-          const now = Date.now();
           
-          // Debounce 2 detik agar tidak spam masukin barang yg sama
-          if (code === lastScanCode && (now - lastScanTime) < 2000) return;
-          
-          lastScanCode = code;
-          lastScanTime = now;
-          console.log("[POS] BARCODE KETEMU:", code);
-          
-          try {
-            const ctx = new (window.AudioContext || window.webkitAudioContext)();
-            const osc = ctx.createOscillator();
-            osc.connect(ctx.destination);
-            osc.frequency.value = 800;
-            osc.start();
-            osc.stop(ctx.currentTime + 0.1);
-          } catch(e) {}
-          
-          // Masukkan kode ke input manual dan trigger scan otomatis
-          barcodeQuery.value = code;
-          handleScan();
+          // LOGIKA AKURASI: Pastikan membaca kode yang SAMA 3 kali berturut-turut
+          if (code === currentCode) {
+            scanMatchCount++;
+          } else {
+            scanMatchCount = 1;
+            currentCode = code;
+          }
+
+          // Jika kode sudah stabil dibaca 3x berturut-turut, baru anggap VALID
+          if (scanMatchCount >= 3) {
+            const now = Date.now();
+            
+            // Debounce 2 detik agar tidak spam masukin barang yg sama
+            if (code === lastScanCode && (now - lastScanTime) < 2000) return;
+            
+            lastScanCode = code;
+            lastScanTime = now;
+            scanMatchCount = 0; // Reset hitungan
+            console.log("[POS] BARCODE VALID KETEMU:", code);
+            
+            try {
+              const ctx = new (window.AudioContext || window.webkitAudioContext)();
+              const osc = ctx.createOscillator();
+              osc.connect(ctx.destination);
+              osc.frequency.value = 800;
+              osc.start();
+              osc.stop(ctx.currentTime + 0.1);
+            } catch(e) {}
+            
+            // Masukkan kode ke input manual dan trigger scan otomatis
+            barcodeQuery.value = code;
+            handleScan();
+          }
         });
       }, 500);
     };
