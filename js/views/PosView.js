@@ -218,6 +218,7 @@ const PosView = {
            </div>
            
            <div class="p-4 bg-slate-900 relative">
+              <!-- WADAH QUAGGA DENGAN KELAS CSS TAILWIND AGAR RESPONSIVE -->
               <div id="barcode-scanner" class="w-full rounded-lg overflow-hidden border-2 border-slate-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
                   <span v-if="cameraStarting" class="absolute material-symbols-outlined animate-spin text-white text-4xl z-0">progress_activity</span>
               </div>
@@ -225,7 +226,7 @@ const PosView = {
            
            <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
              <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
-             Arahkan kamera ke barcode produk. Kamera akan tertutup otomatis saat ketemu.
+             Pastikan garis barcode terlihat jelas di layar.
            </div>
         </div>
       </div>
@@ -298,6 +299,7 @@ const PosView = {
     let lastScanCode = '';
     let lastScanTime = 0; 
     
+    // --- TAMBAHAN UNTUK AKURASI ---
     let currentCode = ''; 
     let scanMatchCount = 0;
 
@@ -345,7 +347,7 @@ const PosView = {
         cart.value[existingIdx].qty++;
         cart.value[existingIdx].subtotal = cart.value[existingIdx].qty * prod.price;
       } else {
-        cart.value.unshift({ 
+        cart.value.unshift({ // Tambah di paling atas agar terlihat jelas
           product: prod,
           qty: 1,
           unit_price: prod.price,
@@ -402,7 +404,7 @@ const PosView = {
       barcodeQuery.value = '';
     };
 
-    // LOGIKA SCANNER KAMERA QUAGGAJS (TUTUP OTOMATIS SAAT KETEMU)
+    // LOGIKA SCANNER KAMERA QUAGGAJS (KHUSUS POS)
     const startCamera = () => {
       scanError.value = '';
       showScannerModal.value = true;
@@ -412,8 +414,9 @@ const PosView = {
 
       setTimeout(() => {
         if (typeof Quagga === 'undefined') {
-          alert("Library QuaggaJS tidak ditemukan.");
+          alert("Library QuaggaJS tidak ditemukan. Periksa koneksi internet.");
           cameraStarting.value = false;
+          stopCamera(); // Auto-close modal jika library gagal
           return;
         }
 
@@ -422,8 +425,17 @@ const PosView = {
             name: "Live",
             type: "LiveStream",
             target: document.querySelector('#barcode-scanner'),
-            constraints: { facingMode: "environment" }
+            constraints: { 
+              facingMode: "environment",
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 }
+            }
           },
+          locator: {
+            patchSize: "medium", // Agar fokus ke garis yang jelas
+            halfSample: true
+          },
+          numOfWorkers: navigator.hardwareConcurrency || 2,
           decoder: {
             readers: [
               "ean_reader", 
@@ -439,14 +451,20 @@ const PosView = {
             if (err) {
                 console.error("[POS] Kamera Gagal:", err);
                 alert("Gagal menyalakan kamera: " + err.message);
+                stopCamera(); // TUTUP OTOMATIS JIKA ERROR
                 return;
             }
             Quagga.start();
         });
 
+        // Event listener saat barcode ditemukan
         Quagga.onDetected((data) => {
           const code = data.codeResult.code;
           
+          // Abaikan kalau kodenya terlalu pendek (biasanya noise pantulan cahaya)
+          if (!code || code.length < 5) return;
+          
+          // LOGIKA AKURASI: Pastikan membaca kode yang SAMA 4 kali berturut-turut
           if (code === currentCode) {
             scanMatchCount++;
           } else {
@@ -454,15 +472,18 @@ const PosView = {
             currentCode = code;
           }
 
-          if (scanMatchCount >= 2) { // 2x match cukup untuk POS agar responsif
+          // Jika kode sudah stabil dibaca 4x berturut-turut, baru anggap VALID
+          if (scanMatchCount >= 4) {
             const now = Date.now();
+            
+            // Debounce 2 detik agar tidak spam masukin barang yg sama
             if (code === lastScanCode && (now - lastScanTime) < 2000) return;
             
             lastScanCode = code;
             lastScanTime = now;
-            scanMatchCount = 0;
+            scanMatchCount = 0; // Reset hitungan
+            console.log("[POS] BARCODE VALID KETEMU:", code);
             
-            // Bunyi Beep sukses
             try {
               const ctx = new (window.AudioContext || window.webkitAudioContext)();
               const osc = ctx.createOscillator();
@@ -472,9 +493,13 @@ const PosView = {
               osc.stop(ctx.currentTime + 0.1);
             } catch(e) {}
             
-            // Masukkan ke input & proses
+            // Masukkan kode ke input manual dan trigger scan otomatis
             barcodeQuery.value = code;
-            stopCamera(); // TUTUP KAMERA OTOMATIS SAAT KETEMU
+            
+            // MATIKAN KAMERA OTOMATIS AGAR TIDAK HANG/STUCK
+            stopCamera(); 
+            
+            // Cari data ke database
             handleScan();
           }
         });
@@ -486,7 +511,7 @@ const PosView = {
         if (typeof Quagga !== 'undefined') {
           Quagga.stop();
         }
-      } catch(e) {}
+      } catch(e) { console.warn("Error stopping scanner", e); }
       showScannerModal.value = false;
       cameraStarting.value = false;
     };

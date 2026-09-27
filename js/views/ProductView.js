@@ -92,7 +92,7 @@ const ProductView = {
               <tr v-for="prod in filteredProducts" :key="prod.id" class="hover:bg-slate-50 transition-colors group">
                 <td class="p-4">
                   <div class="w-10 h-10 rounded-lg border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center shrink-0">
-                    <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w150'" :alt="prod.name" class="w-full h-full object-cover">
+                    <img v-if="prod.image_file_id" :src="'[https://drive.google.com/thumbnail?id=](https://drive.google.com/thumbnail?id=)' + prod.image_file_id + '&sz=w150'" :alt="prod.name" class="w-full h-full object-cover">
                     <span v-else class="material-symbols-outlined text-slate-400 text-lg">image</span>
                   </div>
                 </td>
@@ -292,29 +292,29 @@ const ProductView = {
       </div>
 
       <!-- MODAL SCANNER KHUSUS PRODUK QUAGGAJS -->
-      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700 relative">
+      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700">
            
            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
                <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
-               Pemindai Barcode (QuaggaJS)
+               Scan Barcode Produk
              </h3>
              <button type="button" @click="stopScanner" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
                <span class="material-symbols-outlined text-[18px]">close</span>
              </button>
            </div>
            
-           <div class="p-4 bg-slate-900 relative">
+           <div class="p-4 bg-gray-900 relative">
               <!-- WADAH QUAGGA DENGAN KELAS CSS TAILWIND AGAR RESPONSIVE -->
-              <div id="product-qr-reader" class="w-full rounded-lg overflow-hidden border-2 border-slate-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
+              <div id="product-qr-reader" class="w-full rounded-lg overflow-hidden border-2 border-gray-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
                   <span v-if="cameraStarting" class="absolute material-symbols-outlined animate-spin text-white text-4xl z-0">progress_activity</span>
               </div>
            </div>
            
            <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
              <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
-             Pastikan garis barcode terlihat jelas di layar.
+             Arahkan kamera ke barcode produk (EAN/UPC).
            </div>
         </div>
       </div>
@@ -374,10 +374,11 @@ const ProductView = {
     const showScannerModal = ref(false);
     const cameraStarting = ref(false);
     
-    // --- TAMBAHAN UNTUK AKURASI 3x MATCH ---
+    // --- TAMBAHAN UNTUK AKURASI ---
     let currentCode = ''; 
     let scanMatchCount = 0;
 
+    // Helpers UI Computed
     const uniqueCategories = computed(() => {
       const cats = products.value.map(p => p.category).filter(c => c);
       return [...new Set(cats)].sort();
@@ -445,6 +446,7 @@ const ProductView = {
       loading.value = false;
     };
 
+    // Modal Handling
     const openAddModal = () => {
       modalMode.value = 'add';
       modalError.value = '';
@@ -465,7 +467,7 @@ const ProductView = {
         price: prod.price,
         stock: prod.stock,
         image_base64: null, 
-        image_preview: prod.image_file_id ? `https://drive.google.com/thumbnail?id=${prod.image_file_id}&sz=w800` : prod.image_url 
+        image_preview: prod.image_file_id ? `[https://drive.google.com/thumbnail?id=$](https://drive.google.com/thumbnail?id=$){prod.image_file_id}&sz=w800` : prod.image_url 
       };
       showModal.value = true;
     };
@@ -566,15 +568,19 @@ const ProductView = {
       productToDelete.value = null;
     };
 
+    // LOGIKA SCANNER KAMERA QUAGGAJS (KHUSUS PRODUK)
     const startScanner = () => {
       showScannerModal.value = true;
       cameraStarting.value = true;
+      scanMatchCount = 0;
+      currentCode = '';
       console.log("[PRODUK] Membuka modal scanner QuaggaJS...");
 
       setTimeout(() => {
         if (typeof Quagga === 'undefined') {
           alert("Library QuaggaJS tidak ditemukan. Periksa koneksi internet.");
           cameraStarting.value = false;
+          stopScanner(); // TUTUP OTOMATIS JIKA LIBRARY GAGAL
           return;
         }
 
@@ -583,8 +589,17 @@ const ProductView = {
             name: "Live",
             type: "LiveStream",
             target: document.querySelector('#product-qr-reader'),
-            constraints: { facingMode: "environment" }
+            constraints: { 
+              facingMode: "environment",
+              width: { min: 640, ideal: 1280, max: 1920 },
+              height: { min: 480, ideal: 720, max: 1080 }
+            }
           },
+          locator: {
+            patchSize: "medium", // Stabilkan fokus garis
+            halfSample: true
+          },
+          numOfWorkers: navigator.hardwareConcurrency || 2,
           decoder: {
             readers: [
               "ean_reader", 
@@ -600,6 +615,7 @@ const ProductView = {
             if (err) {
                 console.error("[PRODUK] Kamera Gagal:", err);
                 alert("Gagal menyalakan kamera: " + err.message);
+                stopScanner(); // TUTUP OTOMATIS JIKA KAMERA DIBLOKIR BROWSER
                 return;
             }
             Quagga.start();
@@ -609,7 +625,10 @@ const ProductView = {
         Quagga.onDetected((data) => {
           const code = data.codeResult.code;
           
-          // LOGIKA AKURASI: Pastikan membaca kode yang SAMA 3 kali berturut-turut
+          // Abaikan kalau kodenya terlalu pendek (noise cahaya)
+          if (!code || code.length < 5) return;
+          
+          // LOGIKA AKURASI: Pastikan membaca kode yang SAMA 4 kali berturut-turut
           if (code === currentCode) {
             scanMatchCount++;
           } else {
@@ -617,8 +636,8 @@ const ProductView = {
             currentCode = code;
           }
 
-          // Jika kode sudah stabil dibaca 3x berturut-turut, baru anggap VALID
-          if (scanMatchCount >= 3) {
+          // Jika kode sudah stabil dibaca 4x berturut-turut, baru anggap VALID
+          if (scanMatchCount >= 4) {
             console.log("[PRODUK] BARCODE VALID KETEMU:", code);
             scanMatchCount = 0; // Reset hitungan
             
@@ -631,8 +650,10 @@ const ProductView = {
               osc.stop(ctx.currentTime + 0.1);
             } catch(e) {}
             
-            // Masukkan kode ke form dan tutup kamera
+            // Masukkan kode ke form
             formData.value.barcode = code;
+            
+            // MATIKAN KAMERA OTOMATIS
             stopScanner();
           }
         });
@@ -646,6 +667,7 @@ const ProductView = {
         }
       } catch(e) { console.warn("Error stopping scanner", e); }
       showScannerModal.value = false;
+      cameraStarting.value = false;
     };
 
     onMounted(() => {
