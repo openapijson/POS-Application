@@ -1,5 +1,4 @@
 const { onUnmounted } = Vue;
-
 const PosView = {
   name: 'PosView',
   
@@ -19,23 +18,41 @@ const PosView = {
              <span class="text-[10px] bg-slate-100 text-slate-500 px-2 py-1 rounded font-mono">F2: Cari</span>
            </div>
 
-           <!-- Simulasi Area Kamera (Sesuai Mockup) -->
-           <div class="w-full h-32 md:h-48 bg-slate-900 rounded-xl relative overflow-hidden flex flex-col items-center justify-center group">
-              <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMzMzQxNTUiLz48L3N2Zz4=')] opacity-20"></div>
+           <!-- [REVISI] Area Kamera Asli Terintegrasi html5-qrcode -->
+           <div class="w-full h-32 md:h-48 bg-slate-900 rounded-xl relative overflow-hidden flex flex-col items-center justify-center group border-2 transition-colors duration-300" :class="isCameraActive ? 'border-brandprimary' : 'border-slate-800'">
               
-              <!-- Reticle Scanner -->
-              <div class="relative w-48 h-16 md:w-64 md:h-24 border-2 border-emerald-500/50 rounded flex items-center justify-center">
-                 <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.5)] opacity-50 group-hover:animate-pulse"></div>
-                 <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-emerald-500"></div>
-                 <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-emerald-500"></div>
-                 <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-emerald-500"></div>
-                 <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-emerald-500"></div>
+              <!-- Target div untuk video stream html5-qrcode -->
+              <div id="qr-reader" class="w-full h-full" v-show="isCameraActive"></div>
+              
+              <!-- Overlay saat kamera mati atau standby -->
+              <div v-if="!isCameraActive" class="absolute inset-0 flex flex-col items-center justify-center z-10 bg-slate-900">
+                 <span class="material-symbols-outlined text-4xl text-slate-600 mb-2">videocam_off</span>
+                 <button @click="startCamera" class="px-4 py-2 bg-brandprimary hover:bg-brandprimaryhover text-white text-xs font-bold rounded-lg shadow-lg shadow-brandprimary/20 transition-all flex items-center gap-2">
+                   <span class="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+                   Nyalakan Kamera Scanner
+                 </button>
               </div>
-              <p class="text-[10px] text-emerald-400 font-mono mt-3 absolute bottom-3 z-10">DECOUPLED OPTIC CORE // READY</p>
+
+              <!-- Overlay Kontrol saat kamera nyala -->
+              <button v-if="isCameraActive" @click="stopCamera" class="absolute top-2 right-2 px-2.5 py-1.5 bg-slate-900/80 hover:bg-red-600 text-white text-[10px] font-bold rounded-lg backdrop-blur-sm transition-colors z-20 flex items-center gap-1 border border-slate-700">
+                <span class="material-symbols-outlined text-[14px]">videocam_off</span> Matikan
+              </button>
+
+              <!-- Reticle Scanner (Visual Guide) -->
+              <div v-if="isCameraActive" class="absolute inset-0 pointer-events-none flex items-center justify-center z-10">
+                 <div class="relative w-48 h-16 md:w-64 md:h-24 border-2 border-emerald-500/50 rounded flex items-center justify-center">
+                   <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-0.5 bg-emerald-500 shadow-[0_0_8px_2px_rgba(16,185,129,0.5)] opacity-50 animate-pulse"></div>
+                   <div class="absolute -top-1 -left-1 w-4 h-4 border-t-2 border-l-2 border-emerald-500"></div>
+                   <div class="absolute -top-1 -right-1 w-4 h-4 border-t-2 border-r-2 border-emerald-500"></div>
+                   <div class="absolute -bottom-1 -left-1 w-4 h-4 border-b-2 border-l-2 border-emerald-500"></div>
+                   <div class="absolute -bottom-1 -right-1 w-4 h-4 border-b-2 border-r-2 border-emerald-500"></div>
+                 </div>
+                 <p class="text-[10px] text-emerald-400 font-mono mt-3 absolute bottom-3 z-10 bg-black/50 px-2 py-0.5 rounded backdrop-blur-sm">OPTIC CORE // ACTIVE</p>
+              </div>
            </div>
 
            <!-- Input Barcode Manual -->
-           <div class="relative flex items-center">
+           <div class="relative flex items-center mt-3">
              <div class="absolute left-3 flex items-center justify-center text-slate-400">
                 <span class="material-symbols-outlined text-xl">barcode_scanner</span>
              </div>
@@ -81,7 +98,8 @@ const PosView = {
                  :class="prod.stock > 0 ? 'hover:border-brandprimary/50 hover:shadow-md hover:shadow-brandprimary/10 bg-white' : 'bg-slate-50 opacity-60 cursor-not-allowed'">
                  
                  <div class="w-full aspect-square bg-slate-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
-                   <img v-if="prod.image_url" :src="prod.image_url" class="w-full h-full object-cover">
+                   <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" class="w-full h-full object-cover">
+                   <img v-else-if="prod.image_url" :src="prod.image_url" class="w-full h-full object-cover">
                    <span v-else class="material-symbols-outlined text-slate-300 text-3xl">inventory_2</span>
                    
                    <div class="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm backdrop-blur-sm"
@@ -127,7 +145,8 @@ const PosView = {
 
           <div v-else v-for="(item, index) in cart" :key="item.product.id" class="p-3 bg-white border border-slate-200 rounded-xl flex gap-3 shadow-sm relative group animate-fade-in-up" style="animation-duration: 0.2s">
             <div class="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-100">
-               <img v-if="item.product.image_url" :src="item.product.image_url" class="w-full h-full object-cover">
+               <img v-if="item.product.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + item.product.image_file_id + '&sz=w800'" class="w-full h-full object-cover">
+               <img v-else-if="item.product.image_url" :src="item.product.image_url" class="w-full h-full object-cover">
                <span v-else class="material-symbols-outlined text-slate-300 flex items-center justify-center w-full h-full text-xl">image</span>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-between">
@@ -268,6 +287,8 @@ const PosView = {
   `,
 
   setup() {
+    const { ref, computed, onMounted, onUnmounted } = Vue;
+    
     // State Katalog & Scanner
     const catalog = ref([]);
     const loadingCatalog = ref(true);
@@ -277,6 +298,11 @@ const PosView = {
     const barcodeQuery = ref('');
     const isScanning = ref(false);
     const scanError = ref('');
+
+    // [REVISI] State Kamera Scanner Asli
+    const isCameraActive = ref(false);
+    let html5QrCode = null;
+    let lastScanTime = 0; // Untuk debounce scan
 
     // State Cart & Pembayaran
     const cart = ref([]);
@@ -421,6 +447,67 @@ const PosView = {
       focusScanner();
     };
 
+    // [REVISI] Logika Integrasi HTML5-QRCode
+    const startCamera = async () => {
+      try {
+        scanError.value = '';
+        if (html5QrCode) { await stopCamera(); } // Pastikan instance bersih
+        
+        // Target ID div yang kita buat di template
+        html5QrCode = new Html5Qrcode("qr-reader"); 
+        await html5QrCode.start(
+          { facingMode: "environment" }, // Prioritaskan kamera belakang (HP/Tablet)
+          {
+            fps: 10, // Frame per second pembacaan
+            qrbox: { width: 250, height: 150 }, // Batasan area fokus baca
+            aspectRatio: 1.777778
+          },
+          onScanSuccess,
+          (errorMessage) => { /* Abaikan error tiap frame yang gagal baca barcode */ }
+        );
+        isCameraActive.value = true;
+      } catch (err) {
+        scanError.value = "Gagal mengakses kamera. Pastikan izin kamera diberikan ke browser.";
+        console.error("Camera access error:", err);
+      }
+    };
+
+    const stopCamera = async () => {
+      try {
+        if (html5QrCode && isCameraActive.value) {
+          await html5QrCode.stop();
+          html5QrCode.clear();
+        }
+      } catch (err) {
+        console.error("Gagal menghentikan kamera", err);
+      } finally {
+        isCameraActive.value = false;
+        html5QrCode = null;
+      }
+    };
+
+    const onScanSuccess = (decodedText, decodedResult) => {
+      // Debounce manual: Cegah trigger berkali-kali untuk 1 item dalam 2 detik
+      const now = Date.now();
+      if (now - lastScanTime < 2000) return;
+      lastScanTime = now;
+
+      // UX: Bunyikan BEEP singkat via Web Audio API saat terbaca
+      try {
+         const ctx = new (window.AudioContext || window.webkitAudioContext)();
+         const osc = ctx.createOscillator();
+         osc.connect(ctx.destination);
+         osc.frequency.value = 800; // Frekuensi Beep scanner kasir
+         osc.start();
+         osc.stop(ctx.currentTime + 0.1); // Durasi 0.1 detik
+      } catch(e) {}
+
+      // Masukkan hasil scan ke kolom input dan trigger API pencarian
+      barcodeQuery.value = decodedText;
+      handleScan(); 
+    };
+    // [END REVISI]
+
     // Metode Pembayaran Cepat
     const setExactAmount = () => {
       paymentAmount.value = cartTotalAmount.value;
@@ -518,6 +605,8 @@ const PosView = {
 
     onUnmounted(() => {
       window.removeEventListener('keydown', handleKeydown);
+      // [REVISI] Matikan kamera secara paksa jika kasir pindah tab ke riwayat dsb
+      stopCamera();
     });
 
     return {
@@ -529,6 +618,7 @@ const PosView = {
       barcodeQuery,
       isScanning,
       scanError,
+      isCameraActive, // [REVISI] Expose state ke template
       cart,
       paymentAmount,
       isCheckingOut,
@@ -545,6 +635,8 @@ const PosView = {
       removeFromCart,
       clearCart,
       handleScan,
+      startCamera, // [REVISI]
+      stopCamera,  // [REVISI]
       setExactAmount,
       addAmount,
       processCheckout,

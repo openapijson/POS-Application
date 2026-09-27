@@ -93,7 +93,8 @@ const ProductView = {
               <tr v-for="prod in filteredProducts" :key="prod.id" class="hover:bg-slate-50 transition-colors group">
                 <td class="p-4">
                   <div class="w-10 h-10 rounded-lg border border-slate-200 bg-slate-100 overflow-hidden flex items-center justify-center shrink-0">
-                    <img v-if="prod.image_url" :src="prod.image_url" :alt="prod.name" class="w-full h-full object-cover">
+                    <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" :alt="prod.name" class="w-full h-full object-cover">
+                    <img v-else-if="prod.image_url" :src="prod.image_url" :alt="prod.name" class="w-full h-full object-cover">
                     <span v-else class="material-symbols-outlined text-slate-400 text-lg">image</span>
                   </div>
                 </td>
@@ -312,6 +313,8 @@ const ProductView = {
   `,
 
   setup() {
+    const { ref, computed, onMounted } = Vue; // Pindahkan ke sini
+    
     // UI State
     const loading = ref(true);
     const actionLoading = ref(false);
@@ -432,7 +435,7 @@ const ProductView = {
         price: prod.price,
         stock: prod.stock,
         image_base64: null, // Jangan kirim gambar lama, kecuali user upload ulang
-        image_preview: prod.image_url // Tampilkan gambar dari DB untuk preview
+        image_preview: prod.image_file_id ? `https://drive.google.com/thumbnail?id=${prod.image_file_id}&sz=w800` : prod.image_url // Tampilkan gambar dari DB untuk preview
       };
       showModal.value = true;
     };
