@@ -467,7 +467,7 @@ const ProductView = {
         price: prod.price,
         stock: prod.stock,
         image_base64: null, 
-        image_preview: prod.image_file_id ? `[https://drive.google.com/thumbnail?id=$](https://drive.google.com/thumbnail?id=$){prod.image_file_id}&sz=w800` : prod.image_url 
+        image_preview: prod.image_file_id ? `https://drive.google.com/thumbnail?id=${prod.image_file_id}&sz=w800` : prod.image_url 
       };
       showModal.value = true;
     };
