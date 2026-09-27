@@ -577,13 +577,12 @@ const ProductView = {
         try {
           html5QrCode = new Html5Qrcode("product-qr-reader");
           await html5QrCode.start(
-            { facingMode: "environment" },
+            // Paksa resolusi HD (1280x720)
+            { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
             { 
-              fps: 10, 
-              qrbox: { width: 250, height: 120 },
-              experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true // SANGAT MEMBANTU BACA BARCODE 1D DI HP
-              }
+              fps: 15, 
+              qrbox: { width: 300, height: 150 }, // Kotak dilebarkan
+              aspectRatio: 1.777778 // Rasio 16:9 HD
             },
             (decodedText) => {
               try {
