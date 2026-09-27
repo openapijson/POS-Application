@@ -1,5 +1,7 @@
 const { createApp, ref, watch } = Vue;
 
+// Hapus baris paling atas: const { createApp, ref, computed, onMounted, watch } = Vue;
+
 const app = Vue.createApp({ // Gunakan Vue.createApp langsung
   setup() {
     const { ref, computed, onMounted, watch } = Vue; // Pindahkan ke sini
@@ -21,6 +23,7 @@ const app = Vue.createApp({ // Gunakan Vue.createApp langsung
           { id: 'pos-view', label: 'POS / Kasir', icon: 'point_of_sale' },
           { id: 'product-view', label: 'Manajemen Produk', icon: 'inventory_2' },
           { id: 'transaction-view', label: 'Riwayat Transaksi', icon: 'receipt_long' },
+          { id: 'user-view', label: 'Kelola Pengguna', icon: 'manage_accounts' },
         ];
       } else if (isKasir.value) {
         return [
@@ -269,6 +272,7 @@ app.component('dashboard-view', DashboardView);
 app.component('product-view', ProductView);
 app.component('pos-view', PosView);
 app.component('transaction-view', TransactionView);
+app.component('user-view', UserView);
 
 // Mount aplikasi ke dalam div #app di index.html
 app.mount('#app');
