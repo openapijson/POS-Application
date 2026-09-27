@@ -71,7 +71,7 @@ const PosView = {
                  :class="prod.stock > 0 ? 'hover:border-brandprimary/50 hover:shadow-md hover:shadow-brandprimary/10 bg-white' : 'bg-slate-50 opacity-60 cursor-not-allowed'">
                  
                  <div class="w-full aspect-square bg-slate-100 rounded-lg mb-2 relative overflow-hidden flex items-center justify-center">
-                   <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" class="w-full h-full object-cover">
+                   <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id" class="w-full h-full object-cover">
                    <span v-else class="material-symbols-outlined text-slate-300 text-3xl">inventory_2</span>
                    
                    <div class="absolute top-1 right-1 px-1.5 py-0.5 rounded text-[9px] font-bold shadow-sm backdrop-blur-sm"
@@ -117,7 +117,7 @@ const PosView = {
 
           <div v-else v-for="(item, index) in cart" :key="item.product.id" class="p-3 bg-white border border-slate-200 rounded-xl flex gap-3 shadow-sm relative group animate-fade-in-up" style="animation-duration: 0.2s">
             <div class="w-12 h-12 bg-slate-100 rounded-lg overflow-hidden shrink-0 border border-slate-100">
-              <img v-if="prod.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + prod.image_file_id + '&sz=w800'" class="w-full h-full object-cover">
+               <img v-if="item.product.image_file_id" :src="'https://drive.google.com/thumbnail?id=' + item.product.image_file_id" class="w-full h-full object-cover">
                <span v-else class="material-symbols-outlined text-slate-300 flex items-center justify-center w-full h-full text-xl">image</span>
             </div>
             <div class="flex-1 min-w-0 flex flex-col justify-between">
