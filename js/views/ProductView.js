@@ -308,11 +308,12 @@ const ProductView = {
            
            <!-- Wadah Video Kamera -->
            <div class="p-4 bg-slate-900 relative flex items-center justify-center min-h-[250px]">
-              <div id="product-qr-reader" class="w-full rounded-xl overflow-hidden shadow-inner"></div>
+              <div id="product-qr-reader" class="w-full rounded-xl overflow-hidden shadow-inner bg-black"></div>
            </div>
            
-           <div class="p-4 bg-white text-xs text-slate-500 font-medium">
-             Arahkan kamera ke barcode produk. Sistem akan membaca secara otomatis.
+           <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
+             <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
+             Arahkan kamera ke barcode produk (EAN/UPC).
            </div>
         </div>
       </div>
@@ -572,19 +573,33 @@ const ProductView = {
     // LOGIKA SCANNER KAMERA KHUSUS PRODUK
     const startScanner = () => {
       showScannerModal.value = true;
-      
-      setTimeout(async () => {
+      console.log("[PRODUK] Membuka modal scanner...");
+
+      setTimeout(() => {
+        console.log("[PRODUK] Inisialisasi scanner pada elemen 'product-qr-reader'...");
         try {
+          if (!document.getElementById("product-qr-reader")) {
+             console.error("[PRODUK] ERROR: Elemen div 'product-qr-reader' tidak ditemukan!");
+             return;
+          }
+
           html5QrCode = new Html5Qrcode("product-qr-reader");
-          await html5QrCode.start(
-            // Paksa resolusi HD (1280x720)
-            { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+          console.log("[PRODUK] Library Html5Qrcode berhasil dimuat.");
+
+          html5QrCode.start(
+            { facingMode: "environment" },
             { 
-              fps: 15, 
-              qrbox: { width: 300, height: 150 }, // Kotak dilebarkan
-              aspectRatio: 1.777778 // Rasio 16:9 HD
+              fps: 10, 
+              qrbox: { width: 250, height: 150 },
+              formatsToSupport: [
+                 Html5QrcodeSupportedFormats.EAN_13,
+                 Html5QrcodeSupportedFormats.EAN_8,
+                 Html5QrcodeSupportedFormats.CODE_128,
+                 Html5QrcodeSupportedFormats.UPC_A
+              ]
             },
             (decodedText) => {
+              console.log("[PRODUK] YES! BARCODE KETEMU: ", decodedText);
               try {
                 const ctx = new (window.AudioContext || window.webkitAudioContext)();
                 const osc = ctx.createOscillator();
@@ -598,13 +613,18 @@ const ProductView = {
               stopScanner();
             },
             (err) => { /* Abaikan pesan error frame-by-frame */ }
-          );
+          ).then(() => {
+             console.log("[PRODUK] Kamera SUKSES menyala.");
+          }).catch((err) => {
+             console.error("[PRODUK] Kamera GAGAL menyala:", err);
+             alert("Gagal menyalakan kamera: " + err);
+          });
         } catch (err) {
-          console.error("Gagal menyalakan kamera", err);
-          alert("Gagal mengakses kamera. Gunakan HP untuk fokus yang lebih baik.");
+          console.error("[PRODUK] Terjadi error fatal saat setup kamera:", err);
+          alert("Error library kamera. Cek console log.");
           stopScanner();
         }
-      }, 150);
+      }, 500); // 500ms delay agar DOM modal benar-benar ter-render dulu
     };
 
     const stopScanner = async () => {

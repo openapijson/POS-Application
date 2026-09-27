@@ -1,6 +1,4 @@
 const { onUnmounted } = Vue;
-// Hapus baris paling atas: const { ref, computed, onMounted, onUnmounted } = Vue;
-
 const PosView = {
   name: 'PosView',
   
@@ -220,6 +218,7 @@ const PosView = {
              </button>
            </div>
            
+           <!-- WADAH KAMERA -->
            <div class="p-4 bg-slate-900 relative flex items-center justify-center min-h-[300px]">
               <div id="qr-reader" class="w-full rounded-xl overflow-hidden shadow-inner bg-black"></div>
            </div>
@@ -404,26 +403,49 @@ const PosView = {
     const startCamera = () => {
       scanError.value = '';
       showScannerModal.value = true;
-      setTimeout(async () => {
+      
+      console.log("[POS] Membuka modal kamera...");
+      
+      // Delay 500ms agar rendering DOM (div #qr-reader) 100% selesai
+      setTimeout(() => {
+        console.log("[POS] Inisialisasi Html5Qrcode pada elemen 'qr-reader'...");
         try {
+          if (!document.getElementById("qr-reader")) {
+             console.error("[POS] ERROR: Elemen div 'qr-reader' tidak ditemukan di layar!");
+             return;
+          }
+
           html5QrCode = new Html5Qrcode("qr-reader"); 
-          await html5QrCode.start(
-            { facingMode: "environment" }, 
+          console.log("[POS] Library Html5Qrcode berhasil dimuat.");
+
+          html5QrCode.start(
+            { facingMode: "environment" },
             {
-              fps: 10, 
-              qrbox: { width: 250, height: 120 }, 
-              experimentalFeatures: {
-                useBarCodeDetectorIfSupported: true // SANGAT MEMBANTU BACA BARCODE 1D DI HP
-              }
+              fps: 10,
+              qrbox: { width: 250, height: 150 },
+              formatsToSupport: [
+                 Html5QrcodeSupportedFormats.EAN_13,
+                 Html5QrcodeSupportedFormats.EAN_8,
+                 Html5QrcodeSupportedFormats.CODE_128,
+                 Html5QrcodeSupportedFormats.UPC_A
+              ]
             },
-            onScanSuccess,
-            (errorMessage) => { /* Abaikan error per frame */ }
-          );
+            (decodedText) => {
+              console.log("[POS] YES! BARCODE KETEMU: ", decodedText);
+              onScanSuccess(decodedText);
+            },
+            (errorMessage) => { /* Abaikan error per-frame pencarian */ }
+          ).then(() => {
+             console.log("[POS] Kamera SUKSES menyala.");
+          }).catch((err) => {
+             console.error("[POS] Kamera GAGAL menyala:", err);
+             scanError.value = "Kamera gagal menyala: " + err;
+          });
         } catch (err) {
-          scanError.value = "Gagal mengakses kamera. Gunakan HP untuk fokus kamera yang lebih baik.";
-          showScannerModal.value = false;
+          console.error("[POS] Terjadi error fatal saat setup kamera:", err);
+          scanError.value = "Library kamera error. Cek console log.";
         }
-      }, 150);
+      }, 500); 
     };
 
     const stopCamera = async () => {
