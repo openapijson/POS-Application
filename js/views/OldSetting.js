@@ -18,14 +18,14 @@ const SettingView = {
           <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-[10px] font-bold text-slate-500 mb-2 uppercase tracking-wider">
             Sistem / Perangkat Keras / Pengaturan Printer
           </div>
-          <h1 class="text-2xl font-bold text-slate-800 mb-1">Konfigurasi Printer Thermal & Laci</h1>
-          <p class="text-sm text-slate-500">Kelola koneksi protokol ESC/POS, format kertas, dan otomatisasi</p>
+          <h1 class="text-2xl font-bold text-brandtext mb-1">Konfigurasi Printer Thermal & Laci</h1>
+          <p class="text-sm text-brandmuted">Kelola koneksi protokol ESC/POS, format kertas, dan otomatisasi</p>
         </div>
         
         <div class="flex items-center gap-3 w-full sm:w-auto">
           <div class="hidden md:flex flex-col items-end mr-2">
-            <span class="text-xs font-bold text-slate-800">{{ form.printerPreset || 'Epson' }} <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[9px] ml-1">DEFAULT</span></span>
-            <span class="text-[10px] text-slate-500 uppercase">ONLINE &bull; Com Direct ESC/POS</span>
+            <span class="text-xs font-bold text-slate-800">{{ form.printerPreset || 'Epson TM-T82III' }} <span class="bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded text-[9px] ml-1">DEFAULT</span></span>
+            <span class="text-[10px] text-slate-500">ONLINE &bull; Com Direct ESC/POS</span>
           </div>
           <button @click="testPrint" :disabled="loading" class="px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-50 transition-colors shadow-sm flex items-center gap-2">
             <span class="material-symbols-outlined text-[18px]">print</span> Uji Cetak
@@ -56,7 +56,7 @@ const SettingView = {
                   <p class="text-xs text-slate-500">Tentukan rute transmisi data byte raw ESC/POS</p>
                 </div>
               </div>
-              <span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded uppercase">RAW ESC/POS</span>
+              <span class="bg-slate-200 text-slate-600 text-[10px] font-bold px-2 py-1 rounded uppercase">Raw ESC/POS</span>
             </div>
             
             <div class="p-6 space-y-6">
@@ -153,10 +153,10 @@ const SettingView = {
               </div>
 
               <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
-                <button type="button" class="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
+                <button @click="mockAction('Mencari port hardware aktif...')" type="button" class="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
                   <span class="material-symbols-outlined text-[18px]">search</span> Pindai Port Perangkat
                 </button>
-                <button type="button" class="flex-1 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors shadow-sm flex items-center justify-center gap-2">
+                <button @click="mockAction('Tes ping komunikasi ke printer berhasil (12ms)')" type="button" class="flex-1 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors shadow-sm flex items-center justify-center gap-2">
                   <span class="material-symbols-outlined text-[18px]">sync_alt</span> Tes Respon Komunikasi (Echo)
                 </button>
               </div>
@@ -341,7 +341,7 @@ const SettingView = {
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label class="text-xs font-semibold text-slate-700 block mb-1.5">Teks Header Utama Toko</label>
-                  <textarea v-model="form.headerText" rows="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brandprimary font-mono text-[11px] resize-none" placeholder="Baris 1: Nama TokonBaris 2: Alamat..."></textarea>
+                  <textarea v-model="form.headerText" rows="4" class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-brandprimary font-mono text-[11px] resize-none" placeholder="Baris 1: Nama Toko\nBaris 2: Alamat..."></textarea>
                 </div>
                 <div>
                   <label class="text-xs font-semibold text-slate-700 block mb-1.5">Pesan Footer & Promo</label>
@@ -359,7 +359,7 @@ const SettingView = {
               </div>
               <div>
                 <h2 class="text-base font-bold text-slate-800">Otomatisasi Laci Kasir & Cutter</h2>
-                <p class="text-xs text-slate-500">Trigger elektrik konektor RJ11 cash drawer dan pisau pemotong otomatis</p>
+                <p class="text-xs text-slate-500">Trigger elektrik konektor RJ11 cash drawer dan pisau pemotong</p>
               </div>
             </div>
             
@@ -368,7 +368,7 @@ const SettingView = {
               <div class="flex items-start justify-between p-4 border border-slate-100 rounded-xl bg-slate-50/50">
                 <div class="pr-4">
                   <h4 class="text-sm font-bold text-slate-800 mb-1">Auto-Kick Cash Drawer</h4>
-                  <p class="text-[10px] text-slate-500 mb-2">Mengirim sinyal pulse RJ11 Pin 2 (ESC p 0 25 250 - 24V 100ms) saat kasir menekan tombol "Bayar Tunai".</p>
+                  <p class="text-[10px] text-slate-500 mb-2">Mengirim sinyal pulse RJ11 saat kasir menekan tombol "Bayar Tunai".</p>
                   <span class="text-[9px] font-mono text-emerald-600 flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">bolt</span> Pulse Command: ESC p 0 25 250</span>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer shrink-0 mt-1">
@@ -453,60 +453,62 @@ const SettingView = {
 
             <!-- Kertas Struk Simulasi -->
             <div class="flex-1 bg-slate-100/50 rounded-xl p-4 flex flex-col items-center justify-start overflow-hidden relative">
-              <div v-if="loading" class="absolute inset-0 z-20 bg-white/50 backdrop-blur-sm flex items-center justify-center">
-                 <span class="material-symbols-outlined animate-spin text-brandprimary text-3xl">progress_activity</span>
-              </div>
               
-              <div id="receipt-preview-content" class="relative bg-white shadow-md pb-12 pt-6 px-4 transition-all duration-300 origin-top"
+              <!-- Container Kertas dengan efek gerigi -->
+              <div class="relative bg-white shadow-md pb-12 pt-6 px-4 transition-all duration-300 origin-top"
                    :style="{ width: form.paperWidth === '80' ? '100%' : '75%', transform: form.paperWidth === '80' ? 'scale(1)' : 'scale(0.95)' }">
                 <!-- Gerigi Atas -->
-                <div class="absolute -top-1 left-0 w-full h-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCw4IDQsMCA4LDggMCw4IiBmaWxsPSIjZmZmZmZmIi8+PC9zdmc+')] z-10 hide-on-print"></div>
+                <div class="absolute -top-1 left-0 w-full h-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCw4IDQsMCA4LDggMCw4IiBmaWxsPSIjZmZmZmZmIi8+PC9zdmc+')] z-10"></div>
                 
                 <!-- Konten Struk Monospace -->
-                <div class="font-mono text-[9px] sm:text-[10px] leading-tight text-slate-800 flex flex-col items-center w-full print-content">
+                <div class="font-mono text-[9px] sm:text-[10px] leading-tight text-slate-800 flex flex-col items-center w-full">
                   
                   <!-- Logo Mock -->
-                  <div v-if="form.showLogo" class="w-12 h-12 bg-slate-800 text-white flex items-center justify-center mb-3 hide-on-print">
+                  <div v-if="form.showLogo" class="w-12 h-12 bg-slate-800 text-white flex items-center justify-center mb-3">
                     <span class="material-symbols-outlined text-2xl">receipt</span>
                   </div>
                   
                   <!-- Header Text -->
                   <div class="text-center whitespace-pre-line mb-3 font-bold">
-                    {{ form.headerText || 'NAMA TOKO ANDA' }}
+                    {{ form.headerText || 'DECOUPLED POS' }}
                   </div>
 
                   <!-- Info NPWP & Register -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-2 text-[8px] sm:text-[9px]">
-                    <div class="flex justify-between" v-if="form.showRegister"><span>NO: {{ dummyTrx.receipt_no }}</span><span>{{ formatDate(dummyTrx.created_at) }} {{ formatTime(dummyTrx.created_at) }}</span></div>
-                    <div class="flex justify-between" v-if="form.showRegister"><span>KASIR: {{ dummyTrx.kasir_name }}</span><span>REG: #01</span></div>
+                    <div class="flex justify-between" v-if="form.showRegister"><span>NO: TRX-20250524-014X</span><span>24/05/2025 14:32</span></div>
+                    <div class="flex justify-between" v-if="form.showRegister"><span>KASIR: Budi Santoso</span><span>REG: #01</span></div>
                     <div class="text-center mt-1" v-if="form.showNpwp">NPWP: 01.852.482.9-021.000</div>
                   </div>
 
-                  <!-- Dummy Items -->
+                  <!-- Mock Items -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-2 space-y-1.5">
-                    <div v-for="item in dummyTrx.items" :key="item.name">
-                      <div class="flex justify-between font-bold"><span>{{ item.name }}</span><span>{{ formatRupiah(item.subtotal) }}</span></div>
-                      <div class="text-slate-500">{{ item.qty }} pcs x {{ formatRupiah(item.unit_price) }}</div>
+                    <div>
+                      <div class="flex justify-between font-bold"><span>Kopi Arabika 250g</span><span>Rp 75.000</span></div>
+                      <div class="text-slate-500">1 pcs x Rp 75.000</div>
+                    </div>
+                    <div>
+                      <div class="flex justify-between font-bold"><span>Minyak Goreng 2L</span><span>Rp 38.500</span></div>
+                      <div class="text-slate-500">1 pcs x Rp 38.500</div>
                     </div>
                   </div>
 
-                  <!-- Dummy Totals -->
+                  <!-- Totals -->
                   <div class="w-full border-t border-dashed border-slate-300 pt-2 mb-4 space-y-0.5">
-                    <div class="flex justify-between"><span>SUBTOTAL ({{ dummyTrx.items.length }} ITEM)</span><span>{{ formatRupiah(dummyTrx.total_amount) }}</span></div>
+                    <div class="flex justify-between"><span>SUBTOTAL (2 ITEM)</span><span>Rp 113.500</span></div>
                     <div class="flex justify-between font-bold text-[10px] sm:text-[11px] py-1 border-t border-b border-dashed border-slate-300 my-1">
-                      <span>TOTAL AKHIR</span><span>{{ formatRupiah(dummyTrx.total_amount) }}</span>
+                      <span>TOTAL AKHIR</span><span>Rp 113.500</span>
                     </div>
-                    <div class="flex justify-between"><span>TUNAI (CASH)</span><span>{{ formatRupiah(dummyTrx.payment_amount) }}</span></div>
-                    <div class="flex justify-between font-bold"><span>KEMBALIAN</span><span>{{ formatRupiah(dummyTrx.change_amount) }}</span></div>
+                    <div class="flex justify-between"><span>TUNAI (CASH)</span><span>Rp 150.000</span></div>
+                    <div class="flex justify-between font-bold"><span>KEMBALIAN</span><span>Rp 36.500</span></div>
                   </div>
 
                   <!-- Barcode & QRIS Mock -->
                   <div v-if="form.showBarcode" class="flex flex-col items-center mb-3">
                     <div class="w-3/4 h-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIzMDAiIGhlaWdodD0iMTAwIj48cGF0aCBkPSJNMTAgMTBoMTB2ODBIMTB6TTMwIDEwaDIwdjgwSDMweiM2MCAxMGg1djgwSDYweiM3NSAxMGgxMHY4MEg3NXpNOTUgMTBoMTV2ODBIMTV6IiBmaWxsPSIjMzMzIi8+PC9zdmc+')] bg-cover opacity-80"></div>
-                    <span class="text-[7px] mt-0.5 tracking-widest">*{{ dummyTrx.receipt_no }}*</span>
+                    <span class="text-[7px] mt-0.5 tracking-widest">TRX-20250524-014X</span>
                   </div>
                   
-                  <div v-if="form.showQris" class="flex flex-col items-center mb-3 hide-on-print">
+                  <div v-if="form.showQris" class="flex flex-col items-center mb-3">
                     <div class="w-16 h-16 bg-slate-200 flex items-center justify-center p-1 border border-slate-300">
                       <div class="w-full h-full border-4 border-slate-800 border-dashed"></div>
                     </div>
@@ -525,7 +527,7 @@ const SettingView = {
                 </div>
                 
                 <!-- Gerigi Bawah -->
-                <div class="absolute -bottom-1 left-0 w-full h-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDQsOCA4LDAgMCwwIiBmaWxsPSIjZmZmZmZmIi8+PC9zdmc+')] z-10 hide-on-print"></div>
+                <div class="absolute -bottom-1 left-0 w-full h-2 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjgiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDQsOCA4LDAgMCwwIiBmaWxsPSIjZmZmZmZmIi8+PC9zdmc+')] z-10"></div>
               </div>
             </div>
           </div>
@@ -538,20 +540,20 @@ const SettingView = {
             </div>
             
             <div class="grid grid-cols-3 gap-2 mb-4">
-              <button class="p-2 border border-slate-200 rounded-xl hover:bg-brandprimary/5 hover:border-brandprimary hover:text-brandprimary transition-colors flex flex-col items-center justify-center text-center group">
+              <button @click="mockAction('Sinyal pulse RJ11 (Open Drawer) berhasil terkirim.')" class="p-2 border border-slate-200 rounded-xl hover:bg-brandprimary/5 hover:border-brandprimary hover:text-brandprimary transition-colors flex flex-col items-center justify-center text-center group">
                 <span class="material-symbols-outlined text-slate-400 group-hover:text-brandprimary mb-1 text-[20px]">shelves</span>
                 <span class="text-[10px] font-bold text-slate-700">Buka Laci</span>
                 <span class="text-[8px] text-slate-400">Kick Drawer</span>
               </button>
-              <button class="p-2 border border-slate-200 rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-600 transition-colors flex flex-col items-center justify-center text-center group">
+              <button @click="mockAction('Perintah potong kertas (Partial Cut) berhasil dieksekusi.')" class="p-2 border border-slate-200 rounded-xl hover:bg-orange-50 hover:border-orange-500 hover:text-orange-600 transition-colors flex flex-col items-center justify-center text-center group">
                 <span class="material-symbols-outlined text-slate-400 group-hover:text-orange-500 mb-1 text-[20px]">content_cut</span>
                 <span class="text-[10px] font-bold text-slate-700">Potong Kertas</span>
                 <span class="text-[8px] text-slate-400">Auto-Cut Test</span>
               </button>
               <button @click="testPrint" class="p-2 border border-slate-200 rounded-xl hover:bg-blue-50 hover:border-blue-500 hover:text-blue-600 transition-colors flex flex-col items-center justify-center text-center group">
                 <span class="material-symbols-outlined text-slate-400 group-hover:text-blue-500 mb-1 text-[20px]">text_fields</span>
-                <span class="text-[10px] font-bold text-slate-700">Cetak Struk</span>
-                <span class="text-[8px] text-slate-400">Print Dialog</span>
+                <span class="text-[10px] font-bold text-slate-700">Cetak Font</span>
+                <span class="text-[8px] text-slate-400">Character Ch10</span>
               </button>
             </div>
 
@@ -563,6 +565,14 @@ const SettingView = {
               <div class="flex justify-between items-center">
                 <span class="text-slate-500">Thermal Cover Latch:</span>
                 <span class="font-bold text-slate-700">Tutup Rapat (Closed)</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-500">Thermal Head Temperature:</span>
+                <span class="font-bold text-slate-700">32.4°C (Normal)</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <span class="text-slate-500">Total Cut Count (Lifetime):</span>
+                <span class="font-bold text-slate-700 text-right">142.880 /<br>1.500.000</span>
               </div>
             </div>
           </div>
@@ -590,7 +600,7 @@ const SettingView = {
 
     const loading = ref(true);
 
-    // Form Data (Terhubung langsung ke Data Real di DB)
+    // Form Data Default (Reaktif)
     const form = ref({
       interfaceType: 'USB',
       portOrIp: 'COM3',
@@ -606,52 +616,15 @@ const SettingView = {
       showBarcode: true,
       showQris: false,
       showReturPolicy: true,
-      headerText: 'DECOUPLED POS STORE #01nMall Grand Indonesia Lt. 3 Unit 12nJl. M.H. Thamrin No. 1, Jakarta PusatnNPWP: 01.852.482.9-021.000',
-      footerText: 'Terima kasih atas kunjungan Anda!nFollow IG: @decoupledpos.idnBarang dapat ditukar maks 1x24 jam dengan membawa struk asli.',
+      headerText: 'DECOUPLED POS STORE #01\nMall Grand Indonesia Lt. 3 Unit 12\nJl. M.H. Thamrin No. 1, Jakarta Pusat\nNPWP: 01.852.482.9-021.000',
+      footerText: 'Terima kasih atas kunjungan Anda!\nFollow IG: @decoupledpos.id',
       autoKickDrawer: true,
       cutMethod: 'Partial',
       printDuplicate: false,
       playBeeper: true
     });
 
-    // Data Dummy khusus untuk Pratinjau (agar tampilannya selalu cantik)
-    const dummyTrx = ref({
-       receipt_no: 'TRX-20260927-014X',
-       created_at: new Date().toISOString(),
-       kasir_name: authState.user?.full_name || 'Budi Santoso',
-       items: [
-         { name: 'Kopi Arabika 250g', qty: 1, unit_price: 75000, subtotal: 75000 },
-         { name: 'Minyak Goreng Sawit 2L', qty: 1, unit_price: 38500, subtotal: 38500 }
-       ],
-       total_amount: 113500,
-       payment_amount: 150000,
-       change_amount: 36500
-    });
-
-    // Format Helpers
-    const formatRupiah = (number) => {
-      if (isNaN(number) || number === null) return 'Rp 0';
-      return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(number);
-    };
-    
-    const formatDate = (iso) => {
-        if(!iso) return '';
-        return new Date(iso).toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: 'numeric' });
-    };
-    
-    const formatTime = (iso) => {
-        if(!iso) return '';
-        return new Date(iso).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-    };
-
-    // Parse string dari database ke boolean
-    const parseBoolean = (val, defaultVal) => {
-      if (val === 'true' || val === true) return true;
-      if (val === 'false' || val === false) return false;
-      return defaultVal;
-    };
-
-    // Load Data Setting dari Database Sheet 'Settings'
+    // Fetch setting saat komponen dimuat
     const loadSettings = async () => {
       loading.value = true;
       const res = await apiRequest('settings.get', {}, authState.token);
@@ -659,34 +632,17 @@ const SettingView = {
       if (handleAuthError(res.message)) return;
 
       if (res.success && res.data) {
-        // Timpa data default dengan data ASLI dari database
-        const s = res.data;
-        if(s.interfaceType) form.value.interfaceType = s.interfaceType;
-        if(s.portOrIp) form.value.portOrIp = s.portOrIp;
-        if(s.baudRate) form.value.baudRate = s.baudRate;
-        if(s.printerPreset) form.value.printerPreset = s.printerPreset;
-        if(s.paperWidth) form.value.paperWidth = s.paperWidth;
-        if(s.topFeed) form.value.topFeed = parseInt(s.topFeed, 10);
-        if(s.printDensity) form.value.printDensity = s.printDensity;
-        if(s.charCode) form.value.charCode = s.charCode;
-        if(s.headerText) form.value.headerText = s.headerText;
-        if(s.footerText) form.value.footerText = s.footerText;
-        if(s.cutMethod) form.value.cutMethod = s.cutMethod;
-        
-        form.value.showLogo = parseBoolean(s.showLogo, form.value.showLogo);
-        form.value.showNpwp = parseBoolean(s.showNpwp, form.value.showNpwp);
-        form.value.showRegister = parseBoolean(s.showRegister, form.value.showRegister);
-        form.value.showBarcode = parseBoolean(s.showBarcode, form.value.showBarcode);
-        form.value.showQris = parseBoolean(s.showQris, form.value.showQris);
-        form.value.showReturPolicy = parseBoolean(s.showReturPolicy, form.value.showReturPolicy);
-        form.value.autoKickDrawer = parseBoolean(s.autoKickDrawer, form.value.autoKickDrawer);
-        form.value.printDuplicate = parseBoolean(s.printDuplicate, form.value.printDuplicate);
-        form.value.playBeeper = parseBoolean(s.playBeeper, form.value.playBeeper);
+        // Tumpuk data default dengan data dari server
+        Object.keys(res.data).forEach(key => {
+          if (form.value.hasOwnProperty(key)) {
+            form.value[key] = res.data[key];
+          }
+        });
       }
       loading.value = false;
     };
 
-    // Save Data Setting ke Database Sheet 'Settings'
+    // Simpan setting ke backend
     const saveSettings = async () => {
       loading.value = true;
       const payload = { settings: form.value };
@@ -696,66 +652,20 @@ const SettingView = {
       if (handleAuthError(res.message)) return;
 
       if (res.success) {
-        showToast('Konfigurasi printer berhasil disimpan ke Database!');
+        showToast('Konfigurasi printer berhasil disimpan!');
       } else {
         showToast(res.message || 'Gagal menyimpan pengaturan.', 'error');
       }
       loading.value = false;
     };
 
-    // Fungsi Cetak Asli (Dialog Print OS) - Merespon ukuran kertas!
+    // Simulasi aksi hardware
+    const mockAction = (msg) => {
+      showToast(msg);
+    };
+
     const testPrint = () => {
-      const printContent = document.getElementById('receipt-preview-content').innerHTML;
-      
-      // Ukuran jendela print (300px untuk 80mm, 250px untuk 58mm)
-      const windowWidth = form.value.paperWidth === '80' ? 350 : 280;
-      const printWindow = window.open('', '', `width=${windowWidth},height=600`);
-      
-      printWindow.document.write('<html><head><title>Test Cetak Struk</title>');
-      printWindow.document.write(`
-        <style>
-          body { 
-            font-family: 'Courier New', Courier, monospace; 
-            font-size: ${form.value.paperWidth === '80' ? '12px' : '10px'}; 
-            margin: 0; 
-            padding: 10px; 
-            color: #000;
-          }
-          .hide-on-print { display: none !important; }
-          .flex { display: flex; }
-          .justify-between { justify-content: space-between; }
-          .text-center { text-align: center; }
-          .font-bold { font-weight: bold; }
-          .border-b { border-bottom: 1px dashed #000; }
-          .border-t { border-top: 1px dashed #000; }
-          .pb-2 { padding-bottom: 8px; }
-          .pt-2 { padding-top: 8px; }
-          .mb-2 { margin-bottom: 8px; }
-          .mb-3 { margin-bottom: 12px; }
-          .mb-4 { margin-bottom: 16px; }
-          .mt-1 { margin-top: 4px; }
-          .mt-2 { margin-top: 8px; }
-          .mt-4 { margin-top: 16px; }
-          .py-2 { padding-top: 8px; padding-bottom: 8px; }
-          .space-y-1 > * + * { margin-top: 4px; }
-          .space-y-1.5 > * + * { margin-top: 6px; }
-          .whitespace-pre-line { white-space: pre-line; }
-          
-          /* Auto print cut setup & hide margins */
-          @page { size: auto; margin: 0mm; }
-        </style>
-      `);
-      printWindow.document.write('</head><body>');
-      printWindow.document.write(printContent);
-      printWindow.document.write('</body></html>');
-      printWindow.document.close();
-      printWindow.focus();
-      
-      // Tunggu agar DOM ter-render sebelum memanggil dialog print
-      setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-      }, 500);
+      showToast('Perintah "Test Print" dikirim ke antrean perangkat USB/COM.');
     };
 
     onMounted(() => {
@@ -763,9 +673,13 @@ const SettingView = {
     });
 
     return {
-      form, loading, toast, dummyTrx, authState,
-      saveSettings, testPrint,
-      formatRupiah, formatDate, formatTime
+      form,
+      loading,
+      toast,
+      showToast,
+      saveSettings,
+      mockAction,
+      testPrint
     };
   }
 };
