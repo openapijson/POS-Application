@@ -65,8 +65,10 @@ const app = Vue.createApp({ // Gunakan Vue.createApp langsung
            // Jika token basi/ditolak, handleAuthError otomatis menghapus memori lokal
            currentView.value = 'login-view';
         } else {
-           // Sesi valid! Buka dashboard
-           onLoginSuccess();
+           // Sesi valid! Buka dashboard jika tidak wajib ganti password
+           if (!authState.mustChangePassword) {
+             onLoginSuccess();
+           }
         }
       } else {
         currentView.value = 'login-view';
@@ -87,11 +89,19 @@ const app = Vue.createApp({ // Gunakan Vue.createApp langsung
       // currentView akan otomatis berubah ke login-view berkat watcher di bawah
     };
 
-    // Watcher: Jika state isLoggedIn berubah jadi false (misal karena expired token dari request apapun),
-    // langsung kembalikan view ke login screen.
+    // Watcher: Jika state isLoggedIn berubah
     watch(() => isLoggedIn.value, (newVal) => {
       if (!newVal) {
         currentView.value = 'login-view';
+      } else if (!authState.mustChangePassword) {
+        onLoginSuccess();
+      }
+    });
+
+    // Watcher: Jika user baru saja selesai ganti password wajib
+    watch(() => authState.mustChangePassword, (newVal) => {
+      if (!newVal && isLoggedIn.value) {
+        onLoginSuccess();
       }
     });
 
@@ -126,8 +136,8 @@ const app = Vue.createApp({ // Gunakan Vue.createApp langsung
          <p class="text-sm font-semibold text-slate-500 animate-pulse">Menghubungkan ke Terminal POS...</p>
       </div>
 
-      <!-- Halaman Login -->
-      <login-view v-else-if="!isLoggedIn" @login-success="onLoginSuccess" class="w-full h-full"></login-view>
+      <!-- Halaman Login (Tahan dashboard jika belum login ATAU wajib ganti password) -->
+      <login-view v-else-if="!isLoggedIn || authState.mustChangePassword" @login-success="onLoginSuccess" class="w-full h-full"></login-view>
 
       <!-- Layout Utama Aplikasi (Authenticated) -->
       <div v-else class="flex h-full w-full">
