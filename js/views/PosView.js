@@ -1,4 +1,4 @@
-const { ref, computed, onMounted, onUnmounted } = Vue;
+// const { ref, computed, onMounted, onUnmounted } = Vue;
 
 const PosView = {
   name: 'PosView',
