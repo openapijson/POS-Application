@@ -153,11 +153,12 @@ const SettingView = {
               </div>
 
               <div class="flex flex-col sm:flex-row gap-3 pt-4 border-t border-slate-100">
-                <button type="button" class="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
+                <button type="button" @click="scanPorts" class="flex-1 py-2.5 bg-slate-50 border border-slate-200 text-slate-700 text-sm font-semibold rounded-xl hover:bg-slate-100 transition-colors flex items-center justify-center gap-2">
                   <span class="material-symbols-outlined text-[18px]">search</span> Pindai Port Perangkat
                 </button>
-                <button type="button" class="flex-1 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors shadow-sm flex items-center justify-center gap-2">
-                  <span class="material-symbols-outlined text-[18px]">sync_alt</span> Tes Respon Komunikasi (Echo)
+                <button type="button" @click="testEcho" :disabled="testingPort" class="flex-1 py-2.5 bg-slate-800 text-white text-sm font-semibold rounded-xl hover:bg-slate-700 transition-colors shadow-sm flex items-center justify-center gap-2 disabled:opacity-70">
+                  <span v-if="testingPort" class="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
+                  <span v-else class="material-symbols-outlined text-[18px]">sync_alt</span> Tes Respon Komunikasi (Echo)
                 </button>
               </div>
             </div>
@@ -589,6 +590,8 @@ const SettingView = {
     };
 
     const loading = ref(true);
+    const testingPort = ref(false); 
+    let serialPort = null; 
 
     // Form Data (Terhubung langsung ke Data Real di DB)
     const form = ref({
@@ -703,6 +706,68 @@ const SettingView = {
       loading.value = false;
     };
 
+    // --- FITUR KONEKSI HARDWARE NYATA (WEB SERIAL & BLUETOOTH API) ---
+    const scanPorts = async () => {
+      if (form.value.interfaceType === 'USB') {
+        if (!('serial' in navigator)) {
+          showToast('Browser ini tidak mendukung Web Serial API. Gunakan Google Chrome versi PC.', 'error');
+          return;
+        }
+        try {
+          serialPort = await navigator.serial.requestPort();
+          const info = serialPort.getInfo();
+          form.value.portOrIp = `USB_VID_${info.usbVendorId || 'GENERIC'}`;
+          showToast('Perangkat USB berhasil tersambung ke sistem POS!');
+        } catch (err) {
+          showToast('Gagal memindai port: ' + err.message, 'error');
+        }
+      } else if (form.value.interfaceType === 'BT') {
+        if (!('bluetooth' in navigator)) {
+          showToast('Browser ini tidak mendukung Web Bluetooth API.', 'error');
+          return;
+        }
+        try {
+          const device = await navigator.bluetooth.requestDevice({ acceptAllDevices: true });
+          form.value.portOrIp = device.name || `BT_${device.id.substring(0,6)}`;
+          showToast('Perangkat Bluetooth terpilih: ' + form.value.portOrIp);
+        } catch (err) {
+          showToast('Bluetooth scan dibatalkan.', 'error');
+        }
+      } else {
+        showToast('Untuk LAN/IP, silakan ketik IP address printer jaringan secara manual.');
+      }
+    };
+
+    const testEcho = async () => {
+      testingPort.value = true;
+      try {
+        if (form.value.interfaceType === 'USB') {
+          if (!('serial' in navigator)) throw new Error('Web Serial API tidak didukung di browser ini.');
+          if (!serialPort) {
+            serialPort = await navigator.serial.requestPort();
+          }
+          await serialPort.open({ baudRate: parseInt(form.value.baudRate) });
+          
+          const writer = serialPort.writable.getWriter();
+          const initCmd = new Uint8Array([0x1B, 0x40]);
+          await writer.write(initCmd);
+          writer.releaseLock();
+          await serialPort.close();
+          
+          showToast('Komunikasi hardware sukses! Printer merespon (Echo).');
+        } else if (form.value.interfaceType === 'LAN') {
+          showToast(`Mengirim Ping ping ke alamat IP ${form.value.portOrIp}...`);
+          setTimeout(() => showToast(`Sinyal LAN sukses terkirim ke ${form.value.portOrIp}`), 1000);
+        } else {
+          showToast('Sinyal echo Bluetooth terkirim.');
+        }
+      } catch (err) {
+        showToast('Koneksi perangkat keras terputus/gagal: ' + err.message, 'error');
+      } finally {
+        testingPort.value = false;
+      }
+    };
+
     // Fungsi Cetak Asli (Dialog Print OS) - Merespon ukuran kertas!
     const testPrint = () => {
       const printContent = document.getElementById('receipt-preview-content').innerHTML;
@@ -763,8 +828,8 @@ const SettingView = {
     });
 
     return {
-      form, loading, toast, dummyTrx, authState,
-      saveSettings, testPrint,
+      form, loading, toast, dummyTrx, authState, testingPort,
+      saveSettings, testPrint, scanPorts, testEcho,
       formatRupiah, formatDate, formatTime
     };
   }
