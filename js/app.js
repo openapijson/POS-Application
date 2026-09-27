@@ -24,6 +24,7 @@ const app = Vue.createApp({ // Gunakan Vue.createApp langsung
           { id: 'product-view', label: 'Manajemen Produk', icon: 'inventory_2' },
           { id: 'transaction-view', label: 'Riwayat Transaksi', icon: 'receipt_long' },
           { id: 'user-view', label: 'Kelola Pengguna', icon: 'manage_accounts' },
+          { id: 'setting-view', label: 'Pengaturan Thermal', icon: 'print' }, // NEW
         ];
       } else if (isKasir.value) {
         return [
@@ -285,6 +286,7 @@ app.component('product-view', ProductView);
 app.component('pos-view', PosView);
 app.component('transaction-view', TransactionView);
 app.component('user-view', UserView);
+app.component('setting-view', SettingView); // 
 
 // Mount aplikasi ke dalam div #app di index.html
 app.mount('#app');
