@@ -143,6 +143,7 @@ const ProductView = {
       </div>
 
       <!-- MODAL FORM PRODUK -->
+      <teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="closeModal">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col transform transition-all">
           
@@ -290,8 +291,10 @@ const ProductView = {
           </div>
         </div>
       </div>
+      </teleport>
 
       <!-- MODAL SCANNER KHUSUS PRODUK QUAGGAJS -->
+      <teleport to="body">
       <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" @click.self="stopScanner">
         <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700">
            
@@ -318,6 +321,7 @@ const ProductView = {
            </div>
         </div>
       </div>
+      </teleport>
 
       <!-- MODAL HAPUS -->
       <div v-if="showDeleteModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm" @click.self="showDeleteModal = false">

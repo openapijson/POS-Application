@@ -112,6 +112,7 @@ const TransactionView = {
         </div>
       </div>
 
+      <teleport to="body">
       <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 p-4 backdrop-blur-sm" @click.self="closeModal">
         <div class="bg-slate-100 rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-hidden flex flex-col transform transition-all relative">
           
@@ -216,6 +217,7 @@ const TransactionView = {
           </div>
         </div>
       </div>
+      </teleport>
 
     </div>
   `,

@@ -204,79 +204,84 @@ const PosView = {
       </div>
 
       <!-- MODAL SCANNER KHUSUS POS QUAGGAJS -->
-      <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopCamera">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700 relative">
-           
-           <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
-             <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
-               <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
-               Pemindai Barcode (QuaggaJS)
-             </h3>
-             <button type="button" @click="stopCamera" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
-               <span class="material-symbols-outlined text-[18px]">close</span>
-             </button>
-           </div>
-           
-           <div class="p-4 bg-slate-900 relative">
-              <!-- WADAH QUAGGA DENGAN KELAS CSS TAILWIND AGAR RESPONSIVE -->
-              <div id="barcode-scanner" class="w-full rounded-lg overflow-hidden border-2 border-slate-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
-                  <span v-if="cameraStarting" class="absolute material-symbols-outlined animate-spin text-white text-4xl z-0">progress_activity</span>
-              </div>
-           </div>
-           
-           <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
-             <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
-             Pastikan garis barcode terlihat jelas di layar.
-           </div>
+      <!-- MODAL FORM PRODUK (Diteleportasi ke Body agar full screen) -->
+      <teleport to="body">
+        <div v-if="showScannerModal" class="fixed inset-0 z-[60] flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="stopCamera">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col transform transition-all text-center border border-slate-700 relative">
+            
+            <div class="p-4 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+              <h3 class="text-sm font-bold text-slate-800 flex items-center gap-2">
+                <span class="material-symbols-outlined text-brandprimary text-[18px]">qr_code_scanner</span> 
+                Pemindai Barcode (QuaggaJS)
+              </h3>
+              <button type="button" @click="stopCamera" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 flex items-center justify-center text-slate-600 transition-colors">
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            </div>
+            
+            <div class="p-4 bg-slate-900 relative">
+                <!-- WADAH QUAGGA DENGAN KELAS CSS TAILWIND AGAR RESPONSIVE -->
+                <div id="barcode-scanner" class="w-full rounded-lg overflow-hidden border-2 border-slate-700 bg-black h-[250px] relative flex items-center justify-center [&>video]:w-full [&>video]:h-full [&>video]:object-cover [&>canvas]:absolute [&>canvas]:inset-0 [&>canvas]:w-full [&>canvas]:h-full [&>canvas]:object-cover">
+                    <span v-if="cameraStarting" class="absolute material-symbols-outlined animate-spin text-white text-4xl z-0">progress_activity</span>
+                </div>
+            </div>
+            
+            <div class="p-4 bg-emerald-50 text-emerald-700 text-xs font-bold flex flex-col items-center gap-1 border-t border-emerald-100">
+              <span class="material-symbols-outlined animate-pulse">barcode_scanner</span>
+              Pastikan garis barcode terlihat jelas di layar.
+            </div>
+          </div>
         </div>
-      </div>
+      </teleport>
 
       <!-- MODAL STRUK/SUKSES -->
-      <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="resetPos">
-        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden flex flex-col transform transition-all text-center relative">
-          <div class="absolute -top-16 -left-16 w-32 h-32 bg-emerald-100 rounded-full blur-2xl"></div>
-          <div class="absolute -top-16 -right-16 w-32 h-32 bg-blue-100 rounded-full blur-2xl"></div>
+      <teleport to="body">
+        <div v-if="showSuccessModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 p-4 backdrop-blur-sm" @click.self="resetPos">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm max-h-[90vh] overflow-hidden flex flex-col transform transition-all text-center relative">
+            <div class="absolute -top-16 -left-16 w-32 h-32 bg-emerald-100 rounded-full blur-2xl"></div>
+            <div class="absolute -top-16 -right-16 w-32 h-32 bg-blue-100 rounded-full blur-2xl"></div>
 
-          <div class="p-6 pt-10 flex-1 overflow-y-auto custom-scrollbar relative z-10">
-            <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-500/30 text-white animate-bounce" style="animation-iteration-count: 1;">
-              <span class="material-symbols-outlined text-5xl">check_circle</span>
-            </div>
-            <h2 class="text-2xl font-black text-slate-800 mb-1">Berhasil!</h2>
-            <p class="text-sm text-slate-500 font-mono bg-slate-50 inline-block px-3 py-1 rounded-md mb-6 border border-slate-100">
-              #{{ lastTransaction.receipt_no }}
-            </p>
+            <div class="p-6 pt-10 flex-1 overflow-y-auto custom-scrollbar relative z-10">
+              <div class="w-20 h-20 bg-emerald-500 rounded-full flex items-center justify-center mx-auto mb-5 shadow-lg shadow-emerald-500/30 text-white animate-bounce" style="animation-iteration-count: 1;">
+                <span class="material-symbols-outlined text-5xl">check_circle</span>
+              </div>
+              <h2 class="text-2xl font-black text-slate-800 mb-1">Berhasil!</h2>
+              <p class="text-sm text-slate-500 font-mono bg-slate-50 inline-block px-3 py-1 rounded-md mb-6 border border-slate-100">
+                #{{ lastTransaction.receipt_no }}
+              </p>
 
-            <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100 space-y-3 text-left relative overflow-hidden">
-              <div class="absolute top-0 left-0 w-full h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjQiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDQsNCA4LDAiIGZpbGw9IiNmOGZhZmMiLz48L3N2Zz4=')] opacity-50"></div>
-              
-              <div class="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
-                <span class="text-slate-500">Total Belanja</span>
-                <span class="font-bold text-slate-700">{{ formatRupiah(lastTransaction.total_amount) }}</span>
+              <div class="bg-slate-50 rounded-xl p-4 mb-6 border border-slate-100 space-y-3 text-left relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjQiPjxwb2x5Z29uIHBvaW50cz0iMCwwIDQsNCA4LDAiIGZpbGw9IiNmOGZhZmMiLz48L3N2Zz4=')] opacity-50"></div>
+                
+                <div class="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
+                  <span class="text-slate-500">Total Belanja</span>
+                  <span class="font-bold text-slate-700">{{ formatRupiah(lastTransaction.total_amount) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
+                  <span class="text-slate-500">Tunai Diterima</span>
+                  <span class="font-bold text-slate-700">{{ formatRupiah(lastTransaction.payment_amount) }}</span>
+                </div>
+                <div class="flex justify-between items-center text-base pt-1">
+                  <span class="font-bold text-emerald-600">Kembalian</span>
+                  <span class="font-black text-emerald-600">{{ formatRupiah(lastTransaction.change_amount) }}</span>
+                </div>
+                
+                <div class="absolute bottom-0 left-0 w-full h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjQiPjxwb2x5Z29uIHBvaW50cz0iMCw0IDQsMCA4LDQiIGZpbGw9IiNmOGZhZmMiLz48L3N2Zz4=')] opacity-50"></div>
               </div>
-              <div class="flex justify-between items-center text-sm border-b border-slate-200/50 pb-2">
-                <span class="text-slate-500">Tunai Diterima</span>
-                <span class="font-bold text-slate-700">{{ formatRupiah(lastTransaction.payment_amount) }}</span>
-              </div>
-              <div class="flex justify-between items-center text-base pt-1">
-                <span class="font-bold text-emerald-600">Kembalian</span>
-                <span class="font-black text-emerald-600">{{ formatRupiah(lastTransaction.change_amount) }}</span>
-              </div>
-              
-              <div class="absolute bottom-0 left-0 w-full h-1 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4IiBoZWlnaHQ9IjQiPjxwb2x5Z29uIHBvaW50cz0iMCw0IDQsMCA4LDQiIGZpbGw9IiNmOGZhZmMiLz48L3N2Zz4=')] opacity-50"></div>
+              <p class="text-xs text-slate-400 mb-2">Harap serahkan struk dan uang kembalian ke pelanggan.</p>
             </div>
-            <p class="text-xs text-slate-400 mb-2">Harap serahkan struk dan uang kembalian ke pelanggan.</p>
-          </div>
-          
-          <div class="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-3 z-10">
-            <button @click="printReceipt" class="py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
-              <span class="material-symbols-outlined text-[18px]">print</span> Cetak Struk
-            </button>
-            <button @click="resetPos" class="py-3 rounded-xl bg-brandprimary text-white font-bold text-sm hover:bg-brandprimaryhover shadow-lg shadow-brandprimary/30 transition-colors flex items-center justify-center gap-2">
-              Transaksi Baru <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
-            </button>
+            
+            <div class="p-4 border-t border-slate-100 bg-white grid grid-cols-2 gap-3 z-10">
+              <button @click="printReceipt" class="py-3 rounded-xl border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[18px]">print</span> Cetak Struk
+              </button>
+              <button @click="resetPos" class="py-3 rounded-xl bg-brandprimary text-white font-bold text-sm hover:bg-brandprimaryhover shadow-lg shadow-brandprimary/30 transition-colors flex items-center justify-center gap-2">
+                Transaksi Baru <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </teleport>
 
     </div>
   `,
