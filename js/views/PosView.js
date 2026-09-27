@@ -1,4 +1,6 @@
 const { onUnmounted } = Vue;
+// Hapus baris paling atas: const { ref, computed, onMounted, onUnmounted } = Vue;
+
 const PosView = {
   name: 'PosView',
   
@@ -524,4 +526,3 @@ const PosView = {
     };
   }
 };
-
