@@ -47,7 +47,7 @@ async function minifyDirectory(dir) {
     }
 }
 
-//console.log('====================================');
+console.log('====================================');
 console.log('Memulai Proses Build & Obfuskasi...');
 console.log('====================================');
 
