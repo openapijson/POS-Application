@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('path');
-const terser = require('terser');
+const JavaScriptObfuscator = require('javascript-obfuscator');
 
 function copyDirSync(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
@@ -32,14 +32,19 @@ async function minifyDirectory(dir) {
             const code = fs.readFileSync(fullPath, 'utf8');
             
             try {
-                const result = await terser.minify(code, {
-                    compress: {
-                        drop_console: true, // Hapus console.log di production
-                    },
-                    mangle: true // Acak nama variabel
+                const obfuscationResult = JavaScriptObfuscator.obfuscate(code, {
+                    compact: true,
+                    controlFlowFlattening: true, // Mengacak alur logika
+                    controlFlowFlatteningThreshold: 0.3,
+                    deadCodeInjection: false, 
+                    disableConsoleOutput: true, // Mematikan console.log
+                    identifierNamesGenerator: 'hexadecimal', // Variabel jadi kode hex
+                    stringArray: true, // Menyembunyikan teks string (termasuk URL Config)
+                    stringArrayEncoding: ['base64'], // Enkripsi string menjadi base64/hex
+                    stringArrayThreshold: 0.8
                 });
                 
-                fs.writeFileSync(fullPath, result.code);
+                fs.writeFileSync(fullPath, obfuscationResult.getObfuscatedCode());
             } catch (e) {
                 console.error('Gagal mengacak file:', fullPath, e);
             }
