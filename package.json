@@ -1,0 +1,11 @@
+{
+    "name": "decoupled-pos",
+    "version": "1.0.0",
+    "description": "Script untuk mengacak kode frontend sebelum tayang di Vercel",
+    "scripts": {
+        "build": "node build.js"
+    },
+    "devDependencies": {
+        "terser": "^5.30.0"
+    }
+}
