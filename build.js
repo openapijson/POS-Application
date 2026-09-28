@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const terser = require('terser');
 
-//function copyDirSync(src, dest) {
+function copyDirSync(src, dest) {
     fs.mkdirSync(dest, { recursive: true });
     let entries = fs.readdirSync(src, { withFileTypes: true });
 
@@ -16,9 +16,9 @@ const terser = require('terser');
             fs.copyFileSync(srcPath, destPath);
         }
     }
-// }
+}
 
-//async function minifyDirectory(dir) {
+async function minifyDirectory(dir) {
     const files = fs.readdirSync(dir);
     
     for (const file of files) {
@@ -45,7 +45,7 @@ const terser = require('terser');
             }
         }
     }
-// }
+}
 
 //console.log('====================================');
 console.log('Memulai Proses Build & Obfuskasi...');
